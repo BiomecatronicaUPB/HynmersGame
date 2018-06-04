@@ -113,6 +113,7 @@ bool FKinectInputModuleInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOut
 void FKinectInputModuleInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) {
 	UE_LOG(KinectLog, Log, TEXT("Set Force Feedback %f"), Value);
 }
+
 void FKinectInputModuleInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) {
 	// This will spam the log heavily, comment it out for real plugins :)
 	UE_LOG(KinectLog, Log, TEXT("Set Force Feedback Values"));
