@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "kinect",
+	"Description": "Plugin for impleemnting Kinect sensor as a MoCap controller",
+	"Category": "MovCap",
+	"CreatedBy": "juancaf9312@gmail.com",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+  "Modules": [
+    {
+      "Name": "KinectInput",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
