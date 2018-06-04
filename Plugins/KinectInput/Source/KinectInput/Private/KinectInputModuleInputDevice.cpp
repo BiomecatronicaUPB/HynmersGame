@@ -1,5 +1,5 @@
-#include "PluxControllerModuleInputdevice.h"
-#include "../Public/IPluxControllerModule.h"
+#include "KinectInputModuleInputDevice.h"
+#include "../Public/IKinectInputModule.h"
 
 #include "GenericPlatformMath.h"
 
@@ -15,7 +15,7 @@
 DECLARE_STATS_GROUP(TEXT("Kinect"), STATGROUP_Kinect, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("Kinect Tick"), STAT_KinectTick, STATGROUP_Kinect);
 
-#define LOCTEXT_NAMESPACE "FPluxControllerModule"
+#define LOCTEXT_NAMESPACE "FKinectInputModule"
 
 const FKey FKinectControllerKey::ThighL("thigh_l_axis");
 const FKey FKinectControllerKey::KneeL("knee_l_axis");
@@ -34,7 +34,7 @@ const FKinectControllerKeyNames::Type FKinectControllerKeyNames::AnkleR("ankle_r
 const FKinectControllerKeyNames::Type FKinectControllerKeyNames::TimeStamp("time_stamp_k");
 
 
-FPluxControllerModuleInputDevice::FPluxControllerModuleInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler) {
+FKinectInputModuleInputDevice::FKinectInputModuleInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) : MessageHandler(InMessageHandler) {
 
 	KinectControllerStates = new FKinectControllerState();
 
@@ -52,7 +52,7 @@ FPluxControllerModuleInputDevice::FPluxControllerModuleInputDevice(const TShared
 
 }
 
-void FPluxControllerModuleInputDevice::PreInit()
+void FKinectInputModuleInputDevice::PreInit()
 {
 
 	EKeys::AddKey(FKeyDetails(FKinectControllerKey::ThighL, LOCTEXT("thigh_l_axis", "Thigh Left Axis"), FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
@@ -66,7 +66,7 @@ void FPluxControllerModuleInputDevice::PreInit()
 
 }
 
-void FPluxControllerModuleInputDevice::Tick(float DeltaTime) 
+void FKinectInputModuleInputDevice::Tick(float DeltaTime) 
 {
 	SCOPE_CYCLE_COUNTER(STAT_KinectTick);
 	// This will spam the log heavily, comment it out for real plugins :)
@@ -78,7 +78,7 @@ void FPluxControllerModuleInputDevice::Tick(float DeltaTime)
 
 }
 
-void FPluxControllerModuleInputDevice::SendControllerEvents() 
+void FKinectInputModuleInputDevice::SendControllerEvents() 
 {
 	if (KinectActive) {
 		for (auto i : KinectControllerStates->DegreesAxes) {
@@ -95,12 +95,12 @@ void FPluxControllerModuleInputDevice::SendControllerEvents()
 
 }
 
-void FPluxControllerModuleInputDevice::SetMessageHandler(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) {
+void FKinectInputModuleInputDevice::SetMessageHandler(const TSharedRef< FGenericApplicationMessageHandler >& InMessageHandler) {
 	UE_LOG(KinectLog, Log, TEXT("Set Message Handler"));
 	MessageHandler = InMessageHandler;
 }
 
-bool FPluxControllerModuleInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) {
+bool FKinectInputModuleInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) {
 	UE_LOG(KinectLog, Log, TEXT("Execute Console Command: %s"), Cmd);
 
 	// Put your fancy custom console command code here... 
@@ -111,16 +111,16 @@ bool FPluxControllerModuleInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, F
 
 // IForceFeedbackSystem pass through functions
 //  - I *believe* this is a handel for the game to communicate back to your third party libary (i.e. game tells joystick to increase force feedback/vibrate/turn on/off a light)
-void FPluxControllerModuleInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) {
+void FKinectInputModuleInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) {
 	UE_LOG(KinectLog, Log, TEXT("Set Force Feedback %f"), Value);
 }
-void FPluxControllerModuleInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) {
+void FKinectInputModuleInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) {
 	// This will spam the log heavily, comment it out for real plugins :)
 	UE_LOG(KinectLog, Log, TEXT("Set Force Feedback Values"));
 }
 
 // This is where you nicely clean up your plugin when its told to shut down!
-FPluxControllerModuleInputDevice::~FPluxControllerModuleInputDevice() {
+FKinectInputModuleInputDevice::~FKinectInputModuleInputDevice() {
 	UE_LOG(KinectLog, Log, TEXT("Closing Kinect"));
 	KinectSensor->CloseKinect();
 	delete KinectSensor;

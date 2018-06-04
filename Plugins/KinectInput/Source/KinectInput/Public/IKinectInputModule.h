@@ -7,7 +7,7 @@
 #include "ModuleManager.h"
 #include "Runtime/InputDevice/Public/IInputDeviceModule.h"
 
-class IPluxControllerModule : public IInputDeviceModule
+class IKinectInputModule : public IInputDeviceModule
 {
 	/**
 	* Singleton-like access to this module's interface.  This is just for convenience!
@@ -15,8 +15,8 @@ class IPluxControllerModule : public IInputDeviceModule
 	*
 	* @return Returns singleton instance, loading the module on demand if needed
 	*/
-	static inline IPluxControllerModule& Get() {
-		return FModuleManager::LoadModuleChecked< IPluxControllerModule >("PluxController");
+	static inline IKinectInputModule& Get() {
+		return FModuleManager::LoadModuleChecked< IKinectInputModule >("KinectInput");
 	}
 
 	/**
@@ -25,7 +25,7 @@ class IPluxControllerModule : public IInputDeviceModule
 	* @return True if the module is loaded and ready to use
 	*/
 	static inline bool IsAvailable() {
-		return FModuleManager::Get().IsModuleLoaded("PluxController");
+		return FModuleManager::Get().IsModuleLoaded("KinectInput");
 	}
 };
 

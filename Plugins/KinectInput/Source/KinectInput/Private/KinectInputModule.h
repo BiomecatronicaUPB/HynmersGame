@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Public/IPluxControllerModule.h"
+#include "../Public/IKinectInputModule.h"
 #include "Runtime/InputDevice/Public/IInputDevice.h"
 
-class FPluxControllerModule : public IPluxControllerModule
+class FKinectInputModule : public IKinectInputModule
 {
 public:
 
@@ -15,5 +15,5 @@ public:
 	//virtual void StartupModule() OVERRIDE; // This is not required as IInputDeviceModule handels it!
 	virtual void ShutdownModule() override;
 
-	TSharedPtr< class FPluxControllerModuleInputDevice >PluxInputDevice;
+	TSharedPtr< class FKinectInputModuleInputDevice >KinectInputDevice;
 };

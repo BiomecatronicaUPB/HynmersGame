@@ -3,27 +3,27 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class PluxController : ModuleRules
+public class KinectInput : ModuleRules
 {
     private string ThirdPartyPath
     {
         get { return Path.GetFullPath(Path.Combine(ModuleDirectory, "../../ThirdParty/")); }
     }
 
-    public PluxController(ReadOnlyTargetRules Target) : base(Target)
+    public KinectInput(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				"PluxController/Public",
+				"KinectInput/Public",
             }
 			);  
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"PluxController/Private",
+				"KinectInput/Private",
 				// ... add other private include paths required here ...
 			}
 			);

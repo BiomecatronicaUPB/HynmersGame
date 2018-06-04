@@ -10,10 +10,10 @@
 /**
 * Interface class for Biosignal plux input device
 */
-class  FPluxControllerModuleInputDevice : public IInputDevice
+class  FKinectInputModuleInputDevice : public IInputDevice
 {
 public:
-	FPluxControllerModuleInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& MessageHandler);
+	FKinectInputModuleInputDevice(const TSharedRef< FGenericApplicationMessageHandler >& MessageHandler);
 
 	/** Tick the interface (e.g. check for new controllers) */
 	virtual void Tick(float DeltaTime) override;
@@ -34,7 +34,7 @@ public:
 	// IForceFeedbackSystem pass through functions
 	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override;
 	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override;
-	virtual ~FPluxControllerModuleInputDevice();
+	virtual ~FKinectInputModuleInputDevice();
 private:
 
 
