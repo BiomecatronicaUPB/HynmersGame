@@ -121,8 +121,10 @@ void FKinectInputModuleInputDevice::SetChannelValues(int32 ControllerId, const F
 // This is where you nicely clean up your plugin when its told to shut down!
 FKinectInputModuleInputDevice::~FKinectInputModuleInputDevice() {
 	UE_LOG(KinectLog, Log, TEXT("Closing Kinect"));
-	KinectSensor->CloseKinect();
-	delete KinectSensor;
+	if (KinectSensor) {
+		KinectSensor->CloseKinect();
+		delete KinectSensor;
+	}
 }
 
 

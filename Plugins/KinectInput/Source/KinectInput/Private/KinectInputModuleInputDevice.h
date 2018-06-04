@@ -48,6 +48,6 @@ private:
 
 	FKinectControllerState* KinectControllerStates;
 	
-	class UKinectSensor* KinectSensor;
+	class UKinectSensor* KinectSensor = nullptr;
 	UKinectManager KinectManager;
 };
