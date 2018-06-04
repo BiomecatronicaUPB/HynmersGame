@@ -7,7 +7,13 @@ public class HynmersGame : ModuleRules
 	public HynmersGame(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "OculusHMD" });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
-	}
+        PrivateDependencyModuleNames.AddRange(new string[] {"OculusHMD", "KinectInput" });
+
+        PublicIncludePaths.AddRange(
+            new string[] {"OculusHMD", "KinectInput/Public" });
+
+    }
 }

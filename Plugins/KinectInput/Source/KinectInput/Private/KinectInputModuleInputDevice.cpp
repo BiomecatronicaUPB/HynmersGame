@@ -10,7 +10,6 @@
 #include "GenericApplicationMessageHandler.h"
 
 #include "KinectSensor.h"
-#include "KinectManager.h"
 
 DECLARE_STATS_GROUP(TEXT("Kinect"), STATGROUP_Kinect, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("Kinect Tick"), STAT_KinectTick, STATGROUP_Kinect);

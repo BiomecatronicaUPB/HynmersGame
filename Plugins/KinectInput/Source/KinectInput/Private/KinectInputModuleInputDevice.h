@@ -6,6 +6,7 @@
 #include "Runtime/InputDevice/Public/IInputDevice.h"
 #include "KinectinputState.h"
 #include "SharedPointerInternals.h"
+#include "KinectManager.h"
 
 /**
 * Interface class for Biosignal plux input device
@@ -48,5 +49,5 @@ private:
 	FKinectControllerState* KinectControllerStates;
 	
 	class UKinectSensor* KinectSensor;
-	class UKinectManager KinectManager;
+	UKinectManager KinectManager;
 };
