@@ -33,13 +33,19 @@ class AHynmersCharacter : public ACharacter
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class UPoseableMeshComponent* BoneMesh;
 
-
-
 	float Rate[4];
+
 
 
 public:
 	AHynmersCharacter(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(BlueprintReadWrite, Category = "Transform")
+	FTransform InitialTransform;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Transform")
+	float RotationState = 0;
+
 
 protected:
 	virtual void BeginPlay();
@@ -90,7 +96,8 @@ protected:
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
 
-
+	UFUNCTION(BlueprintCallable, Category = "Transform")
+		void UpdateTransform(FTransform Target, float alpha);
 	
 protected:
 	// APawn interface

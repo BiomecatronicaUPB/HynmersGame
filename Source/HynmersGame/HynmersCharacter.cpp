@@ -206,3 +206,16 @@ void AHynmersCharacter::PosRightKnee(float rate)
 {
 	Rate[3] = rate * 180.f / PI;
 }
+
+void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
+{
+	FVector TargetLocation = Target.GetLocation();
+	FQuat TargetRotation = Target.GetRotation() * InitialTransform.GetRotation().Inverse();
+
+	TargetLocation = (TargetLocation - InitialTransform.GetLocation())*alpha;
+
+	AddActorWorldRotation(TargetRotation.Rotator()*(alpha - RotationState));
+	SetActorLocation(TargetLocation + InitialTransform.GetLocation());
+
+	RotationState = alpha;
+}

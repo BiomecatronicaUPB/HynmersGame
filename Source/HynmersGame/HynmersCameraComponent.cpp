@@ -95,11 +95,11 @@ void UHynmersCameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& D
 		const AController* OwningController = OwningPawn ? OwningPawn->GetController() : nullptr;
 		if (OwningController && OwningController->IsLocalPlayerController())
 		{
-			const FRotator PawnViewRotation = OwningPawn->GetViewRotation();
-			if (!PawnViewRotation.Equals(GetComponentRotation()))
+			const FQuat PawnViewRotation = OwningPawn->GetViewRotation().Quaternion();
+			if (!PawnViewRotation.Equals(GetComponentRotation().Quaternion()))
 			{
 				if (Parent) {
-					Parent->SetWorldRotation(PawnViewRotation);
+					Parent->SetRelativeRotation(PawnViewRotation);
 				}
 				else {
 					SetWorldRotation(PawnViewRotation);
