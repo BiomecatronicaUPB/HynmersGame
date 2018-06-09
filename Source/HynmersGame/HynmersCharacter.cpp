@@ -16,7 +16,7 @@
 #include "Components/PoseableMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
-
+#include "Animation/AnimCompositeBase.h"
 #include "Paths.h"
 #include <ctime>
 
