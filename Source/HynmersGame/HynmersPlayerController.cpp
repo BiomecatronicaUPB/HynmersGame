@@ -24,23 +24,24 @@ void AHynmersPlayerController::BeginPlay()
 		return;
 	}
 
+	BonesAngles.Add("thigh_l", 0.f);
+	BonesAngles.Add("calf_l", 0.f);
+	BonesAngles.Add("thigh_r", 0.f);
+	BonesAngles.Add("calf_r", 0.f);
+
 }
 
 void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction & ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	TArray<TPair<FName, float>> send;
-	send.Add(TPair<FName, float>(FName("thigh_l"), -30.f));
-	send.Add(TPair<FName, float>(FName("calf_l"), 0.f));
-	send.Add(TPair<FName, float>(FName("thigh_r"), -18.f));
-	send.Add(TPair<FName, float>(FName("calf_r"), 0.f));
-	float Error;
-	float ResultTime = FindPoseInMontage(send, WalkSequence, &Error);
-
-	UE_LOG(LogTemp, Warning, TEXT("Time found = %f Error: %f"), ResultTime, Error);
-
 	if (PawnAnimationInstance && WalkSequence && WalkMontage) {
+		float Error;
+		float ResultTime = FindPoseInMontage(BonesAngles, WalkSequence, &Error);
+
+		UE_LOG(LogTemp, Warning, TEXT("Time found = %f Error: %f"), ResultTime, Error);
+
+		// Sequence reproduction control
 		PawnAnimationInstance->Montage_SetPosition(WalkMontage,ResultTime);
 		PawnAnimationInstance->Montage_Play(WalkMontage);
 		PawnAnimationInstance->Montage_Pause(WalkMontage);
@@ -51,7 +52,34 @@ void AHynmersPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	check(InputComponent);
+
+	InputComponent->BindAxis("PosLeftThight", this, &AHynmersPlayerController::PosLeftThight);
+	InputComponent->BindAxis("PosLeftKnee", this, &AHynmersPlayerController::PosLeftKnee);
+	InputComponent->BindAxis("PosRightThight", this, &AHynmersPlayerController::PosRightThight);
+	InputComponent->BindAxis("PosRightKnee", this, &AHynmersPlayerController::PosRightKnee);
+
 }
+
+void AHynmersPlayerController::PosLeftThight(float rate)
+{
+	BonesAngles.Add("thigh_l", rate * 180.f / PI);
+}
+
+void AHynmersPlayerController::PosLeftKnee(float rate)
+{
+	BonesAngles.Add("calf_l", rate * 180.f / PI);
+}
+
+void AHynmersPlayerController::PosRightThight(float rate)
+{
+	BonesAngles.Add("thigh_r", rate * 180.f / PI);
+}
+
+void AHynmersPlayerController::PosRightKnee(float rate)
+{
+	BonesAngles.Add("calf_r", rate * 180.f / PI);
+}
+
 
 void AHynmersPlayerController::CreateMontage()
 {
@@ -60,7 +88,7 @@ void AHynmersPlayerController::CreateMontage()
 	}
 }
 
-float AHynmersPlayerController::FindPoseInMontage(TArray<TPair<FName,float>> BonesRotation, UAnimSequence* Sequence, float* Error)
+float AHynmersPlayerController::FindPoseInMontage(TMap<FName,float> BonesRotation, UAnimSequence* Sequence, float* Error)
 {
 	if(!BonesRotation.Num() || !Sequence)
 		return 0.0f;
@@ -82,17 +110,19 @@ float AHynmersPlayerController::FindPoseInMontage(TArray<TPair<FName,float>> Bon
 		FramesFound[bone].Init(0.f, NumFrames);
 
 		for (int frame = 0; frame < NumFrames; frame++) {
+			TArray<FName> BonesKeys;
+			BonesRotation.GetKeys(BonesKeys);
 			// Sequence Pose
 			FTransform FrameTransform;
-			Sequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesRotation[bone].Key), Sequence->GetTimeAtFrame(frame), true);
+			Sequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone]), Sequence->GetTimeAtFrame(frame), true);
 			FQuat FrameRotation = FrameTransform.GetRotation();
 
 			// Calculating Yaw angle
 			FRotator FrameRotator = (RefPoseRotation.Inverse()*FrameRotation).Rotator();
 
-			FramesFound[bone][frame] = UKismetMathLibrary::Abs(FrameRotator.Yaw - BonesRotation[bone].Value);
+			FramesFound[bone][frame] = UKismetMathLibrary::Abs(FrameRotator.Yaw - BonesRotation[BonesKeys[bone]]);
 			//UE_LOG(LogTemp, Warning, TEXT("Difference: %f frame: %d"), FramesFound[bone][frame], frame)
-			UE_LOG(LogTemp, Warning, TEXT("Rotation: %s frame: %d bone: %s"), *FrameRotator.ToString(), frame, *BonesRotation[bone].Key.ToString())
+			UE_LOG(LogTemp, Warning, TEXT("Rotation: %s frame: %d bone: %s"), *FrameRotator.ToString(), frame, *BonesKeys[bone].ToString())
 		}
 		BetterFrames[bone] = FindMinsInArray(FramesFound[bone], NumBetterFrames);
 		for (int k = 0; k < NumBetterFrames; k++) {
@@ -108,11 +138,14 @@ float AHynmersPlayerController::FindPoseInMontage(TArray<TPair<FName,float>> Bon
 	return FindTimeInRange(BonesRotation, TimeRange, Sequence, 0, Error);
 }
 
-FQuat AHynmersPlayerController::GetRefPoseQuat(TArray<TPair<FName, float>> &BonesRotation, int bone)
+FQuat AHynmersPlayerController::GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone)
 {
+	TArray<FName> BonesKeys;
+	BonesRotation.GetKeys(BonesKeys);
+
 	// SkeletalMesh reference pose
 	FTransformArrayA2 TransformArray = ControlledPawn->GetMesh()->SkeletalMesh->Skeleton->GetReferenceSkeleton().GetRefBonePose();
-	FTransform Transform = TransformArray[ControlledPawn->GetMesh()->GetBoneIndex(BonesRotation[bone].Key)];
+	FTransform Transform = TransformArray[ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone])];
 	return Transform.GetRotation();
 }
 
@@ -163,8 +196,10 @@ bool AHynmersPlayerController::ChangeRange(TArray<int32> &Range, TArray<int32> F
 	return false;
 }
 
-float AHynmersPlayerController::FindTimeInRange(TArray<TPair<FName, float>> BonesRotation, TArray<float> Range, UAnimSequence * Sequence, int32 CurrentDepth, float* Error)
+float AHynmersPlayerController::FindTimeInRange(TMap<FName,float> BonesRotation, TArray<float> Range, UAnimSequence * Sequence, int32 CurrentDepth, float* Error)
 {
+	TArray<FName> BonesKeys;
+	BonesRotation.GetKeys(BonesKeys);
 	int32 NumBones = BonesRotation.Num();
 
 	float TimeRange[] = { Range[0], (Range[1] - Range[0]) / 2.f, Range[1] };
@@ -175,11 +210,11 @@ float AHynmersPlayerController::FindTimeInRange(TArray<TPair<FName, float>> Bone
 		for (int bone = 0; bone < NumBones; bone++) {
 			FQuat RefPoseRotation = GetRefPoseQuat(BonesRotation, bone);
 			FTransform FrameTransform;
-			Sequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesRotation[bone].Key), TimeRange[time], true);
+			Sequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone]), TimeRange[time], true);
 			FQuat FrameRotation = FrameTransform.GetRotation();
 
 			FRotator FrameRotator = (RefPoseRotation.Inverse()*FrameRotation).Rotator();
-			Values[time] += UKismetMathLibrary::Abs(FrameRotator.Yaw - BonesRotation[bone].Value);
+			Values[time] += UKismetMathLibrary::Abs(FrameRotator.Yaw - BonesRotation[BonesKeys[bone]]);
 		}
 		Values[time] /= (float)NumBones;
 	}

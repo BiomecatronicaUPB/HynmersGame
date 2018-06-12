@@ -35,7 +35,9 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	TArray<int> FindFrameRange(TArray<TArray<int>> Frames, int NumBones, int NumFrames);
 
 	bool ChangeRange(TArray<int32> &Range, TArray<int32> Frames);
-	float FindTimeInRange(TArray<TPair<FName, float>> BonesRotation, TArray<float> Range, UAnimSequence * Sequence, int32 CurrentDepth, float* Error);
+	float FindTimeInRange(TMap<FName,float> BonesRotation, TArray<float> Range, UAnimSequence * Sequence, int32 CurrentDepth, float* Error);
+
+	TMap<FName,float> BonesAngles;
 
 protected:
 	virtual void BeginPlay() override;
@@ -48,6 +50,14 @@ protected:
 	void CreateMontage();
 
 	// Returns the time found int he sequence with the minimun rotation errors
-	float FindPoseInMontage(TArray<TPair<FName, float>> BonesRotation, UAnimSequence* Sequence, float* Error = nullptr);
-	FQuat GetRefPoseQuat(TArray<TPair<FName, float>> &BonesRotation, int bone);
+	float FindPoseInMontage(TMap<FName,float> BonesRotation, UAnimSequence* Sequence, float* Error = nullptr);
+	FQuat GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone);
+
+public:
+
+	// Kinect Input Events
+	void PosLeftThight(float rate);
+	void PosLeftKnee(float rate);
+	void PosRightThight(float rate);
+	void PosRightKnee(float rate);
 };

@@ -104,12 +104,12 @@ void AHynmersCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	FName BonesNames[] = { FName("thigh_l"), FName("calf_l"), FName("thigh_r"), FName("calf_r"), FName("foot_l"), FName("foot_r") };
+	//FName BonesNames[] = { FName("thigh_l"), FName("calf_l"), FName("thigh_r"), FName("calf_r"), FName("foot_l"), FName("foot_r") };
 
-	for (int i = 0; i < 4; i++) {
-		FRotator BoneRotation = (i >= 2) ? FRotator(-90 - Rate[i], 90, 90) : FRotator(90 - Rate[i], 90, 90);
-		BoneMesh->SetBoneRotationByName(BonesNames[i], BoneRotation, EBoneSpaces::ComponentSpace);
-	}
+	//for (int i = 0; i < 4; i++) {
+	//	FRotator BoneRotation = (i >= 2) ? FRotator(-90 - Rate[i], 90, 90) : FRotator(90 - Rate[i], 90, 90);
+	//	BoneMesh->SetBoneRotationByName(BonesNames[i], BoneRotation, EBoneSpaces::ComponentSpace);
+	//}
 }
 
 
@@ -140,10 +140,10 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AHynmersCharacter::LookUpAtRate);
 
 
-	PlayerInputComponent->BindAxis("PosLeftThight", this, &AHynmersCharacter::PosLeftThight);
-	PlayerInputComponent->BindAxis("PosLeftKnee", this, &AHynmersCharacter::PosLeftKnee);
-	PlayerInputComponent->BindAxis("PosRightThight", this, &AHynmersCharacter::PosRightThight);
-	PlayerInputComponent->BindAxis("PosRightKnee", this, &AHynmersCharacter::PosRightKnee);
+	//PlayerInputComponent->BindAxis("PosLeftThight", this, &AHynmersCharacter::PosLeftThight);
+	//PlayerInputComponent->BindAxis("PosLeftKnee", this, &AHynmersCharacter::PosLeftKnee);
+	//PlayerInputComponent->BindAxis("PosRightThight", this, &AHynmersCharacter::PosRightThight);
+	//PlayerInputComponent->BindAxis("PosRightKnee", this, &AHynmersCharacter::PosRightKnee);
 }
 
 
