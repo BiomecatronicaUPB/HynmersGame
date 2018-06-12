@@ -110,7 +110,6 @@ void AHynmersCharacter::Tick(float DeltaSeconds)
 		FRotator BoneRotation = (i >= 2) ? FRotator(-90 - Rate[i], 90, 90) : FRotator(90 - Rate[i], 90, 90);
 		BoneMesh->SetBoneRotationByName(BonesNames[i], BoneRotation, EBoneSpaces::ComponentSpace);
 	}
-
 }
 
 
@@ -120,6 +119,7 @@ void AHynmersCharacter::Tick(float DeltaSeconds)
 void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
+
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -218,4 +218,9 @@ void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 	SetActorLocation(TargetLocation + InitialTransform.GetLocation());
 
 	RotationState = alpha;
+}
+
+FTransform AHynmersCharacter::GetBoneTransform(FName BoneName)
+{
+	return Mesh->GetBoneTransform(Mesh->GetBoneIndex(BoneName));
 }

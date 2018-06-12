@@ -10,7 +10,7 @@ public class HynmersGame : ModuleRules
         
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "OculusHMD" });
 
-        PrivateDependencyModuleNames.AddRange(new string[] {"Engine", "OculusHMD", "KinectInput" });
+        PrivateDependencyModuleNames.AddRange(new string[] {"OculusHMD", "KinectInput" });
 
         PublicIncludePaths.AddRange(
             new string[] {"OculusHMD", "KinectInput/Public" });
