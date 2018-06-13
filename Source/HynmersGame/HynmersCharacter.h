@@ -64,9 +64,6 @@ public:
 	/** Whether to use motion controller location for aiming. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
-
-
-protected:
 	
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
@@ -96,8 +93,13 @@ protected:
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
 
+protected:
+
 	UFUNCTION(BlueprintCallable, Category = "Transform")
 		void UpdateTransform(FTransform Target, float alpha);
+
+	UFUNCTION(BlueprintCallable, Category = "Bones")
+		FTransform GetBoneTransform(FName BoneName);
 	
 protected:
 	// APawn interface
