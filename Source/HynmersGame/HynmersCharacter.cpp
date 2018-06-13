@@ -139,11 +139,6 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AHynmersCharacter::LookUpAtRate);
 
-
-	//PlayerInputComponent->BindAxis("PosLeftThight", this, &AHynmersCharacter::PosLeftThight);
-	//PlayerInputComponent->BindAxis("PosLeftKnee", this, &AHynmersCharacter::PosLeftKnee);
-	//PlayerInputComponent->BindAxis("PosRightThight", this, &AHynmersCharacter::PosRightThight);
-	//PlayerInputComponent->BindAxis("PosRightKnee", this, &AHynmersCharacter::PosRightKnee);
 }
 
 

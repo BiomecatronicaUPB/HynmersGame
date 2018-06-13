@@ -52,7 +52,7 @@ UHynmersMovementComponent::UHynmersMovementComponent()
 	PerchAdditionalHeight = 40.f;
 
 	MaxFlySpeed = 600.0f;
-	MaxWalkSpeed = 600.0f;
+	MaxWalkSpeed = 150.0f;
 	MaxSwimSpeed = 300.0f;
 	MaxCustomMovementSpeed = MaxWalkSpeed;
 
