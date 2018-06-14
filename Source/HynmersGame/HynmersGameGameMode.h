@@ -13,6 +13,9 @@ class AHynmersGameGameMode : public AGameModeBase
 
 public:
 	AHynmersGameGameMode();
+
+	UFUNCTION(BlueprintCallable, Category = "Spawning")
+	bool CanSpawnAtLocation(FVector Location, FVector BoxHalfStent);
 };
 
 

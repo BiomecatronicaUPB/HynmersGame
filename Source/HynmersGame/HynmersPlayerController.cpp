@@ -74,7 +74,7 @@ float AHynmersPlayerController::SelectSkeletonPose(TArray<int> FrameSearchRange)
 	float Error;
 	float ResultTime = FindPoseInMontage(BonesAngles, WalkSequence, FrameSearchRange, &Error);
 
-	UE_LOG(LogTemp, Warning, TEXT("Time found = %f Err Value: %f"), ResultTime, Error);
+	//UE_LOG(LogTemp, Warning, TEXT("Time found = %f Err Value: %f"), ResultTime, Error);
 
 	// Sequence reproduction control
 	PawnAnimationInstance->Montage_Play(WalkMontage);

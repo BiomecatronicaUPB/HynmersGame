@@ -4,6 +4,7 @@
 #include "HynmersGameHUD.h"
 #include "HynmersGameCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine/World.h"
 
 AHynmersGameGameMode::AHynmersGameGameMode()
 	: Super()
@@ -14,4 +15,11 @@ AHynmersGameGameMode::AHynmersGameGameMode()
 
 	// use our custom HUD class
 	HUDClass = AHynmersGameHUD::StaticClass();
+}
+
+bool AHynmersGameGameMode::CanSpawnAtLocation(FVector Location, FVector BoxHalfStent)
+{
+	FHitResult HitResult;
+
+	return GetWorld()->SweepSingleByChannel(HitResult, Location, Location, FQuat::Identity, ECollisionChannel::ECC_WorldStatic, FCollisionShape::MakeBox(BoxHalfStent));
 }
