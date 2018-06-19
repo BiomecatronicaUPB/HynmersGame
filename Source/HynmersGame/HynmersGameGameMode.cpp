@@ -5,6 +5,7 @@
 #include "HynmersGameCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 AHynmersGameGameMode::AHynmersGameGameMode()
 	: Super()
@@ -20,6 +21,16 @@ AHynmersGameGameMode::AHynmersGameGameMode()
 bool AHynmersGameGameMode::CanSpawnAtLocation(FVector Location, FVector BoxHalfStent)
 {
 	FHitResult HitResult;
-
 	return GetWorld()->SweepSingleByChannel(HitResult, Location, Location, FQuat::Identity, ECollisionChannel::ECC_WorldStatic, FCollisionShape::MakeBox(BoxHalfStent));
+}
+
+void AHynmersGameGameMode::SpawnMapInSession(FMapSavedParameters MapParameters, TSubclassOf<AActor> BridgeClass)
+{
+	if (!MapParameters.TilesToBeSpawned.Num())
+		return;
+	TArray<AActor*> BridgeTiles;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(),BridgeClass, BridgeTiles);
+
+	
+
 }
