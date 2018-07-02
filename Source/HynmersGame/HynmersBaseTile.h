@@ -11,29 +11,33 @@ class HYNMERSGAME_API AHynmersBaseTile : public AActor
 {
 	GENERATED_BODY()
 	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* Center;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* Box;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	class UArrowComponent* Arrow;
+
+
 public:	
 	// Sets default values for this actor's properties
 	AHynmersBaseTile();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USceneComponent* Center;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* Box;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UArrowComponent* Arrow;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Defaults")
 	virtual void MakeDefaultTransform(FVector Location, FRotator Rotation, USceneComponent* Component);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Attachment")
 	virtual FTransform GetAttachLocation();
 
 	

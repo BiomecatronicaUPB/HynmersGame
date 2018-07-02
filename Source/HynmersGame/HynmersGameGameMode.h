@@ -2,24 +2,12 @@
 
 #pragma once
 
+#include "HynmersSaveGame.h"
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "HynmersGameGameMode.generated.h"
 
-USTRUCT(BlueprintType)
-struct FMapSavedParameters {
-
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(BlueprintReadWrite, Category = "Map")
-	TArray<FVector> SplinesEndLocations;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Map")
-	FTransform BridgeInitialTransfor;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Map")
-	TArray<TSubclassOf<AActor>> TilesToBeSpawned;
-};
+class UHynmersSaveGame;
 
 UCLASS(minimalapi)
 class AHynmersGameGameMode : public AGameModeBase
@@ -33,7 +21,35 @@ public:
 	bool CanSpawnAtLocation(FVector Location, FVector BoxHalfStent);
 
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
-	void SpawnMapInSession(FMapSavedParameters MapParameters, TSubclassOf<AActor> BridgeClass);
+	bool SpawnSessionMap(FMapSavedParameters MapParameters);
+
+protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
+	void InitBlueprints();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
+	void PostBeginPlay();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "SavedGame")
+	UHynmersSaveGame* LoadSavedGameData();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BridgeGates")
+	FTransform UpdateBridgeGatesTransform(FTransform TransformToDelete);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
+	class AHynmersConnector* SpawnConnector(FTransform Location, FVector SplineEndLocation);
+
+	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
+	UHynmersSaveGame* MapSaved = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
+	int32 MaxGenerationTries = 100;
+
+	// Angle in degrees
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
+	float ConeHalfAngle = 90.f;
 };
 
 

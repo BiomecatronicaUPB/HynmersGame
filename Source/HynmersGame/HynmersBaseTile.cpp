@@ -6,14 +6,14 @@
 
 
 // Sets default values
-AHynmersBaseTile::AHynmersBaseTile()
+AHynmersBaseTile::AHynmersBaseTile():Super()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Center = CreateDefaultSubobject<USceneComponent>("Origin");
+	Center = CreateDefaultSubobject<USceneComponent>("Center");
 	SetRootComponent(Center);
-	Box = CreateDefaultSubobject<UBoxComponent>("Surroundings");
+	Box = CreateDefaultSubobject<UBoxComponent>("Box");
 	Box->SetupAttachment(RootComponent);
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
 	Arrow->SetupAttachment(RootComponent);
@@ -51,4 +51,3 @@ FTransform AHynmersBaseTile::GetAttachLocation()
 	}
 	return FTransform::Identity;
 }
-
