@@ -24,6 +24,7 @@ public:
 	bool SpawnSessionMap(FMapSavedParameters MapParameters);
 
 protected:
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
@@ -43,6 +44,12 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
 	UHynmersSaveGame* MapSaved = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
+	TArray<FMapSavedParameters> GameStateStruct;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SavedGame")
+	FString SlotName = "Default";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
 	int32 MaxGenerationTries = 100;

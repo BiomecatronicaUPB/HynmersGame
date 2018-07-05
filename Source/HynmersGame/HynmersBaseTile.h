@@ -16,15 +16,16 @@ class HYNMERSGAME_API AHynmersBaseTile : public AActor
 	USceneComponent* Center;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* Box;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	class UArrowComponent* Arrow;
 
 
 public:	
 	// Sets default values for this actor's properties
 	AHynmersBaseTile();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform")
+	class UBoxComponent* Box;
+
 
 protected:
 	// Called when the game starts or when spawned

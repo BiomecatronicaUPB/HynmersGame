@@ -30,5 +30,6 @@ class HYNMERSGAME_API UHynmersSaveGame : public USaveGame
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY(BlueprintReadWrite, Category = "Data")
 	TArray<FMapSavedParameters> SavedMap;
 };

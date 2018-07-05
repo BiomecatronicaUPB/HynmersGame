@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "HynmersBaseTile.h"
 #include "HynmersConnector.h"
+#include "Components/BoxComponent.h"
 
 AHynmersGameGameMode::AHynmersGameGameMode()
 	: Super()
@@ -46,19 +47,50 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 	if(MapParameters.TilesToBeSpawned.Num() == 0)
 		return false;
 
-	FTransform GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
-	for (int i = 0; i < MapParameters.TilesToBeSpawned.Num(); i++) {
-		auto Tile = MapParameters.TilesToBeSpawned[i];
 
-		for (int attemp = 0; attemp < MaxGenerationTries; attemp++) {
+	FMapSavedParameters CurrentSession;
+	FTransform GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
+
+	CurrentSession.BridgeInitialTransform = GateTransform;
+
+	for (int i = 0; i < MapParameters.TilesToBeSpawned.Num(); i++) {
+
+		int attemp;
+		for (attemp = 0; attemp < MaxGenerationTries; attemp++) {
 			FVector SplineEndLocation = (MapParameters.SplinesEndLocations.Num() > 0) ? 
 				MapParameters.SplinesEndLocations[i] : UKismetMathLibrary::RandomUnitVectorInConeInDegrees(FVector(1, 0, 0), ConeHalfAngle);
 
 			AHynmersConnector* Connector = SpawnConnector(GateTransform, SplineEndLocation);
-			break;
+			FTransform TileTransform = Connector->GetAttachLocation();
 
+			AHynmersBaseTile* SpawnedTile =(AHynmersBaseTile*) GetWorld()->SpawnActor<AActor>(MapParameters.TilesToBeSpawned[i], TileTransform);
+
+			TArray<AActor*> OverlappingActors;
+			SpawnedTile->Box->GetOverlappingActors(OverlappingActors);
+
+			if (OverlappingActors.Num() == 0) {
+				CurrentSession.TilesToBeSpawned.Add(MapParameters.TilesToBeSpawned[i]);
+				CurrentSession.SplinesEndLocations.Add(SplineEndLocation);
+				GateTransform = SpawnedTile->GetAttachLocation();
+				break;
+			}
+
+			SpawnedTile->Destroy();
+			if(SpawnedTile)
+				delete SpawnedTile;
+
+			Connector->Destroy();
+			if(Connector)
+				delete Connector;
+		}
+
+		if (attemp == MaxGenerationTries - 1) {
+			UE_LOG(LogTemp, Error, TEXT("Map generation failed"));
+			return false;
 		}
 	}
+
+	GameStateStruct.Add(CurrentSession);
 
 	return true;
 }
