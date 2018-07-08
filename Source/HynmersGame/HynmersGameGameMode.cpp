@@ -28,6 +28,7 @@ void AHynmersGameGameMode::BeginPlay()
 
 	InitBlueprints();
 	MapSaved = LoadSavedGameData();
+
 	if (ensure(MapSaved)) {
 		for (FMapSavedParameters Session : MapSaved->SavedMap) {
 			SpawnSessionMap(Session);
@@ -36,20 +37,21 @@ void AHynmersGameGameMode::BeginPlay()
 	}
 }
 
-bool AHynmersGameGameMode::CanSpawnAtLocation(FVector Location, FVector BoxHalfStent)
-{
-	FHitResult HitResult;
-	return GetWorld()->SweepSingleByChannel(HitResult, Location, Location, FQuat::Identity, ECollisionChannel::ECC_WorldStatic, FCollisionShape::MakeBox(BoxHalfStent));
-}
-
 bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 {
 	if(MapParameters.TilesToBeSpawned.Num() == 0)
 		return false;
 
-
 	FMapSavedParameters CurrentSession;
-	FTransform GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
+	FTransform GateTransform;
+	AHynmersBaseTile* MachineRoomTile = (AHynmersBaseTile*)CheckMachineRoom(MapParameters.TilesToBeSpawned, MapParameters.TilesToBeSpawned);
+
+	if (MachineRoomTile) {
+		GateTransform = MachineRoomTile->GetAttachLocation();
+	}
+	else {
+		GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
+	}
 
 	CurrentSession.BridgeInitialTransform = GateTransform;
 
@@ -63,7 +65,7 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			AHynmersConnector* Connector = SpawnConnector(GateTransform, SplineEndLocation);
 			FTransform TileTransform = Connector->GetAttachLocation();
 
-			AHynmersBaseTile* SpawnedTile =(AHynmersBaseTile*) GetWorld()->SpawnActor<AActor>(MapParameters.TilesToBeSpawned[i], TileTransform);
+			AHynmersBaseTile* SpawnedTile = (AHynmersBaseTile*)SpawnTile(MapParameters.TilesToBeSpawned[i], TileTransform);
 
 			TArray<AActor*> OverlappingActors;
 			SpawnedTile->Box->GetOverlappingActors(OverlappingActors);
@@ -76,12 +78,7 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			}
 
 			SpawnedTile->Destroy();
-			if(SpawnedTile)
-				delete SpawnedTile;
-
 			Connector->Destroy();
-			if(Connector)
-				delete Connector;
 		}
 
 		if (attemp == MaxGenerationTries - 1) {

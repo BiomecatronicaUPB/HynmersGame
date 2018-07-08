@@ -8,6 +8,7 @@
 #include "HynmersGameGameMode.generated.h"
 
 class UHynmersSaveGame;
+class AActor;
 
 UCLASS(minimalapi)
 class AHynmersGameGameMode : public AGameModeBase
@@ -16,9 +17,6 @@ class AHynmersGameGameMode : public AGameModeBase
 
 public:
 	AHynmersGameGameMode();
-
-	UFUNCTION(BlueprintCallable, Category = "Spawning")
-	bool CanSpawnAtLocation(FVector Location, FVector BoxHalfStent);
 
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	bool SpawnSessionMap(FMapSavedParameters MapParameters);
@@ -41,6 +39,12 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
 	class AHynmersConnector* SpawnConnector(FTransform Location, FVector SplineEndLocation);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
+	AActor* SpawnTile(TSubclassOf<AActor> TileToSpawn, FTransform Transform);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
+	AActor* CheckMachineRoom(const TArray<TSubclassOf<AActor>>& TilesToBeSpawned, TArray<TSubclassOf<AActor>>& OutTiles);
 
 	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
 	UHynmersSaveGame* MapSaved = nullptr;
