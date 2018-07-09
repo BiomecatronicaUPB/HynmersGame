@@ -44,7 +44,7 @@ protected:
 	AActor* SpawnTile(TSubclassOf<AActor> TileToSpawn, FTransform Transform);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
-	AActor* CheckMachineRoom(const TArray<TSubclassOf<AActor>>& TilesToBeSpawned, TArray<TSubclassOf<AActor>>& OutTiles);
+	AActor* CheckMachineRoom(const TArray<TSubclassOf<AActor>>& TilesToBeSpawned, int32& TileIndex);
 
 	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
 	UHynmersSaveGame* MapSaved = nullptr;

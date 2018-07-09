@@ -44,10 +44,15 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 
 	FMapSavedParameters CurrentSession;
 	FTransform GateTransform;
-	AHynmersBaseTile* MachineRoomTile = (AHynmersBaseTile*)CheckMachineRoom(MapParameters.TilesToBeSpawned, MapParameters.TilesToBeSpawned);
+	int32 MachineRoomIndex;
+	AHynmersBaseTile* MachineRoomTile = (AHynmersBaseTile*)CheckMachineRoom(MapParameters.TilesToBeSpawned, MachineRoomIndex);
 
 	if (MachineRoomTile) {
 		GateTransform = MachineRoomTile->GetAttachLocation();
+		// Add to the save game the machine room
+		CurrentSession.TilesToBeSpawned.Add(MapParameters.TilesToBeSpawned[MachineRoomIndex]);
+		// Delete from the load game the machine room cause it is not spawned
+		MapParameters.TilesToBeSpawned.RemoveAt(MachineRoomIndex);
 	}
 	else {
 		GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
