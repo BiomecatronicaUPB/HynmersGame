@@ -38,8 +38,8 @@ AHynmersCharacter::AHynmersCharacter(const FObjectInitializer& ObjectInitializer
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
 	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
+	BaseTurnRate = 60.f;
+	BaseLookUpRate = 60.f;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh = GetMesh();
@@ -134,10 +134,7 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AHynmersCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AHynmersCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("Turn", this, &AHynmersCharacter::TurnAtRate);
 
 }
 
@@ -168,13 +165,7 @@ void AHynmersCharacter::MoveRight(float Value)
 void AHynmersCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AHynmersCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
 }
 
 void AHynmersCharacter::OnExit(void)
@@ -182,25 +173,6 @@ void AHynmersCharacter::OnExit(void)
 	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit);
 }
 
-void AHynmersCharacter::PosLeftThight(float rate)
-{
-	Rate[0] = rate * 180.f / PI;
-}
-
-void AHynmersCharacter::PosLeftKnee(float rate)
-{
-	Rate[1] = rate * 180.f / PI;
-}
-
-void AHynmersCharacter::PosRightThight(float rate)
-{
-	Rate[2] = rate * 180.f / PI;
-}
-
-void AHynmersCharacter::PosRightKnee(float rate)
-{
-	Rate[3] = rate * 180.f / PI;
-}
 
 void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 {
