@@ -80,7 +80,6 @@ public:
 	 */
 	void TurnAtRate(float Rate);
 
-	void OnExit(void);
 
 protected:
 

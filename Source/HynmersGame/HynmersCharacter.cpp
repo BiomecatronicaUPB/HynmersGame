@@ -124,7 +124,6 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("Exit", IE_Pressed, this, &AHynmersCharacter::OnExit);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AHynmersCharacter::OnResetVR);
 
@@ -167,12 +166,6 @@ void AHynmersCharacter::TurnAtRate(float Rate)
 	// calculate delta for this frame from the rate information
 	AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
 }
-
-void AHynmersCharacter::OnExit(void)
-{
-	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit);
-}
-
 
 void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 {
