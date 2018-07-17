@@ -14,11 +14,6 @@ class HYNMERSGAME_API UHynmersMovementComponent : public UCharacterMovementCompo
 {
 	GENERATED_BODY()
 
-/*Revision:
-	TickComponent
-		PerformMovement
-			PhysSwimming
-*/
 public:
 
 	UHynmersMovementComponent();
@@ -99,7 +94,21 @@ public:
 
 	// Angular velocity in degrees per second
 	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
-		float AngularVelocity = 90.f;
+	float AngularVelocity = 90.f;
+
+	// Impulse Fornt Impulse for jumping
+	UPROPERTY(EditDefaultsonly, BlueprintReadWrite, Category = "Jumping", meta = (ClampMin = "0", UIMin = "0", ClampMax = "1000"))
+	float ForwardJumpImpulse = 420.f;
+
+	// Flag for controlling special forward jump
+	UPROPERTY(EditDefaultsonly, BlueprintReadWrite, Category = "Jumping")
+	bool bSpecialJumpEnabled = false;
+
+	UPROPERTY(Category = "Jumping", EditDefaultsonly,  BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))
+	float JumpAngularVelocity = 60.f;
+
+	UPROPERTY(Category = "Jumping", BlueprintReadWrite)
+	float CurrentJumpAngularVelocity = 0.f;
 
 private:
 	FVector UpVector;

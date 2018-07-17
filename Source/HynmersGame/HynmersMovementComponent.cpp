@@ -191,6 +191,11 @@ void UHynmersMovementComponent::TickComponent(float DeltaTime, enum ELevelTick T
 		UpdatedComponent->AddWorldRotation(DeltaRotation);
 	}
 
+	if (bSpecialJumpEnabled) {
+		FQuat DeltaRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(RightVector, CurrentJumpAngularVelocity*DeltaTime));
+		UpdatedComponent->AddWorldRotation(DeltaRotation);
+	}
+
 	UpVector = UpdatedComponent->GetUpVector();
 	ForwardVector = UpdatedComponent->GetForwardVector();
 	RightVector = UpdatedComponent->GetRightVector();
@@ -2106,7 +2111,8 @@ bool UHynmersMovementComponent::DoJump(bool bReplayingMoves)
 		// Don't jump if we can't move up/down.
 		if (!bConstrainToPlane || FMath::Abs(PlaneConstraintNormal | UpVector) != 1.f)
 		{
-			Velocity = (Velocity | RightVector)*RightVector + (Velocity | ForwardVector)*ForwardVector + JumpZVelocity*UpVector;
+			Velocity = (Velocity | RightVector)*RightVector + (Velocity | ForwardVector)*ForwardVector + JumpZVelocity*UpVector + ((bSpecialJumpEnabled)?ForwardJumpImpulse*ForwardVector:FVector::ZeroVector);
+			CurrentJumpAngularVelocity = -JumpAngularVelocity;
 			SetMovementMode(MOVE_Falling);
 			return true;
 		}
@@ -2135,7 +2141,7 @@ void UHynmersMovementComponent::ProcessLanded(const FHitResult & Hit, float rema
 	}
 	if (IsFalling())
 	{
-
+		CurrentJumpAngularVelocity = 0.f;
 		SetPostLandedPhysics(Hit);
 	}
 
@@ -2529,4 +2535,3 @@ float UHynmersMovementComponent::ImmersionDepth() const
 	}
 	return depth;
 }
-
