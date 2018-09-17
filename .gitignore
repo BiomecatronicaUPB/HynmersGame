@@ -3,6 +3,9 @@ DerivedDataCache
 Intermediate
 Saved
 Content/StarterContent/*
+Content/KiteDemo/*
+Content/SoulCity/*
+Content/GTFreeMaterials/*
 .vs
 *.VC.db
 *.opensdf
