@@ -50,26 +50,9 @@ AHynmersCharacter::AHynmersCharacter(const FObjectInitializer& ObjectInitializer
 	//Mesh->RelativeRotation = FRotator(1.9f, -19.19f, 5.2f);
 	//Mesh->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
-	BoneMesh = CreateOptionalDefaultSubobject<UPoseableMeshComponent>(TEXT("BoneMesh"));
-	if (BoneMesh)
-	{
-		BoneMesh->AlwaysLoadOnClient = true;
-		BoneMesh->AlwaysLoadOnServer = true;
-		BoneMesh->bOwnerNoSee = false;
-		BoneMesh->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPose;
-		BoneMesh->bCastDynamicShadow = true;
-		BoneMesh->bAffectDynamicIndirectLighting = true;
-		BoneMesh->PrimaryComponentTick.TickGroup = TG_PrePhysics;
-		BoneMesh->SetupAttachment(GetCapsuleComponent());
-		static FName MeshCollisionProfileName(TEXT("CharacterMesh"));
-		BoneMesh->SetCollisionProfileName(MeshCollisionProfileName);
-		BoneMesh->bGenerateOverlapEvents = false;
-		BoneMesh->SetCanEverAffectNavigation(false);
-	}
-
 	// Create a CameraComponent	
 	RootCameraComponent = CreateDefaultSubobject<USceneComponent>(TEXT("FirstPersonCameraRoot"));
-	RootCameraComponent->SetupAttachment(BoneMesh, FName("CameraPoint"));
+	RootCameraComponent->SetupAttachment(Mesh, FName("CameraPoint"));
 	RootCameraComponent->RelativeRotation = FRotator(-6.5f, 56.f, -90.f);
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UHynmersCameraComponent>(TEXT("FirstPersonCamera"));

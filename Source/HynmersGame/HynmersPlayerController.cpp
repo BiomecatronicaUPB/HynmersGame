@@ -169,7 +169,8 @@ FQuat AHynmersPlayerController::GetRefPoseQuat(TMap<FName,float> &BonesRotation,
 
 	// SkeletalMesh reference pose
 	FTransformArrayA2 TransformArray = ControlledPawn->GetMesh()->SkeletalMesh->Skeleton->GetReferenceSkeleton().GetRefBonePose();
-	FTransform Transform = TransformArray[ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone])];
+	int32 index = ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone]);
+	FTransform Transform = (index == INDEX_NONE) ? FTransform::Identity : TransformArray[index];
 	return Transform.GetRotation();
 }
 
