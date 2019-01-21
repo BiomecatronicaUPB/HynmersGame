@@ -1030,7 +1030,6 @@ bool UHynmersMovementComponent::SafeMoveUpdatedComponent(const FVector& Delta, c
 	}
 
 	bool bMoveResult = false;
-
 	// Scope for move flags
 	{
 		// Conditionally ignore blocking overlaps (based on CVar)
@@ -1038,7 +1037,7 @@ bool UHynmersMovementComponent::SafeMoveUpdatedComponent(const FVector& Delta, c
 		bMoveResult = MoveUpdatedComponent(Delta, NewRotation, bSweep, &OutHit, Teleport);
 	}
 
-	// Handle initial penetrations
+	 //Handle initial penetrations
 	if (OutHit.bStartPenetrating && UpdatedComponent)
 	{
 		const FVector RequestedAdjustment = GetPenetrationAdjustment(OutHit);

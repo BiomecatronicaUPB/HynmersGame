@@ -105,8 +105,8 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHynmersCharacter::HGJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AHynmersCharacter::HGStopJumping);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AHynmersCharacter::OnResetVR);
 
@@ -117,6 +117,7 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &AHynmersCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUp", this, &AHynmersCharacter::LookUpRate);
 
 }
 
@@ -131,7 +132,7 @@ void AHynmersCharacter::MoveForward(float Value)
 	if (Value != 0.0f)
 	{
 		// add movement in that direction
-		AddMovementInput(GetRootComponent()->GetForwardVector(), Value);
+		AddMovementInput((bReadyToSwim)?GetActorUpVector():GetRootComponent()->GetForwardVector(), Value);
 	}
 }
 
@@ -148,6 +149,24 @@ void AHynmersCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
+}
+
+void AHynmersCharacter::LookUpRate(float Rate)
+{
+	if (GetCharacterMovement()->IsSwimming()) {
+		AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorRightVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
+	}
+}
+
+void AHynmersCharacter::HGJump()
+{
+	if(!GetCharacterMovement()->IsSwimming())
+		bStartJump = true;
+}
+
+void AHynmersCharacter::HGStopJumping()
+{
+	bStartJump = false;
 }
 
 void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
