@@ -50,26 +50,9 @@ AHynmersCharacter::AHynmersCharacter(const FObjectInitializer& ObjectInitializer
 	//Mesh->RelativeRotation = FRotator(1.9f, -19.19f, 5.2f);
 	//Mesh->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
-	BoneMesh = CreateOptionalDefaultSubobject<UPoseableMeshComponent>(TEXT("BoneMesh"));
-	if (BoneMesh)
-	{
-		BoneMesh->AlwaysLoadOnClient = true;
-		BoneMesh->AlwaysLoadOnServer = true;
-		BoneMesh->bOwnerNoSee = false;
-		BoneMesh->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPose;
-		BoneMesh->bCastDynamicShadow = true;
-		BoneMesh->bAffectDynamicIndirectLighting = true;
-		BoneMesh->PrimaryComponentTick.TickGroup = TG_PrePhysics;
-		BoneMesh->SetupAttachment(GetCapsuleComponent());
-		static FName MeshCollisionProfileName(TEXT("CharacterMesh"));
-		BoneMesh->SetCollisionProfileName(MeshCollisionProfileName);
-		BoneMesh->bGenerateOverlapEvents = false;
-		BoneMesh->SetCanEverAffectNavigation(false);
-	}
-
 	// Create a CameraComponent	
 	RootCameraComponent = CreateDefaultSubobject<USceneComponent>(TEXT("FirstPersonCameraRoot"));
-	RootCameraComponent->SetupAttachment(BoneMesh, FName("CameraPoint"));
+	RootCameraComponent->SetupAttachment(Mesh, FName("CameraPoint"));
 	RootCameraComponent->RelativeRotation = FRotator(-6.5f, 56.f, -90.f);
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UHynmersCameraComponent>(TEXT("FirstPersonCamera"));
@@ -122,8 +105,8 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHynmersCharacter::HGJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AHynmersCharacter::HGStopJumping);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AHynmersCharacter::OnResetVR);
 
@@ -134,6 +117,7 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &AHynmersCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUp", this, &AHynmersCharacter::LookUpRate);
 
 }
 
@@ -148,7 +132,7 @@ void AHynmersCharacter::MoveForward(float Value)
 	if (Value != 0.0f)
 	{
 		// add movement in that direction
-		AddMovementInput(GetRootComponent()->GetForwardVector(), Value);
+		AddMovementInput((bReadyToSwim)?GetActorUpVector():GetRootComponent()->GetForwardVector(), Value);
 	}
 }
 
@@ -165,6 +149,24 @@ void AHynmersCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorUpVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
+}
+
+void AHynmersCharacter::LookUpRate(float Rate)
+{
+	if (GetCharacterMovement()->IsSwimming()) {
+		AddActorWorldRotation(UKismetMathLibrary::RotatorFromAxisAndAngle(GetActorRightVector(), Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds()));
+	}
+}
+
+void AHynmersCharacter::HGJump()
+{
+	if(!GetCharacterMovement()->IsSwimming())
+		bStartJump = true;
+}
+
+void AHynmersCharacter::HGStopJumping()
+{
+	bStartJump = false;
 }
 
 void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)

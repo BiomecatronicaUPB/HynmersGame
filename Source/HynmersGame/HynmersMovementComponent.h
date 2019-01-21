@@ -101,7 +101,7 @@ public:
 	float ForwardJumpImpulse = 420.f;
 
 	// Flag for controlling special forward jump
-	UPROPERTY(EditDefaultsonly, BlueprintReadWrite, Category = "Jumping")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jumping")
 	bool bSpecialJumpEnabled = false;
 
 	UPROPERTY(Category = "Jumping", EditDefaultsonly,  BlueprintReadWrite, meta = (ClampMin = "0", UIMin = "0"))

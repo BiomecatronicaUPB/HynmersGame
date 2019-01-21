@@ -30,8 +30,11 @@ class AHynmersCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMotionControllerComponent* L_MotionController;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UPoseableMeshComponent* BoneMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
+	bool bStartJump = false;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
+	bool bReadyToSwim = false;
 
 	float Rate[4];
 
@@ -79,6 +82,10 @@ public:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void TurnAtRate(float Rate);
+	void LookUpRate(float Rate);
+
+	void HGJump();
+	void HGStopJumping();
 
 
 protected:
