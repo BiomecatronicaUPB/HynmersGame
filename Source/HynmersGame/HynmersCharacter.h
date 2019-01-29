@@ -49,6 +49,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Transform")
 	float RotationState = 0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
+	bool bInteractWith = false;
+
 
 protected:
 	virtual void BeginPlay();
@@ -86,6 +89,9 @@ public:
 
 	void HGJump();
 	void HGStopJumping();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	int32 GetCurrentTile() const;
 
 
 protected:

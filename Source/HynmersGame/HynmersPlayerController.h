@@ -9,23 +9,44 @@
 /**
  * 
  */
+
+class UAnimMontage;
+
 UCLASS()
 class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	class UAnimSequence* WalkSequence = nullptr;
+	UAnimMontage* WalkMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* JumpMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* SwimMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* BoardMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* BikeMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* LegsMoveMontage = nullptr;
 
 	// Animation objects
 	class AHynmersCharacter* ControlledPawn = nullptr;
 	class UAnimInstance* PawnAnimationInstance = nullptr;
-	class UAnimMontage* WalkMontage = nullptr;
+
+	TArray<UAnimMontage*> Montages;
+	TArray<int32> NumBetterFrames;
+	TMap<int32, int32> MapMontage;
 
 	// Offset between left and rigth legs
 	int32 OffsetFrame = 15;
 
-	float PastAnimTime = 0.f;
+	TArray<float> PastAnimTime;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
 	int MaxAccelTimes = 50;
@@ -35,7 +56,7 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 
 	// Max range amplitude to make binary search
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	int32 NumBetterFrames = 6;
+	int32 NumBetterFramesDefault = 6;
 
 	// Depth to stop the binary search
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
@@ -67,13 +88,13 @@ protected:
 	float SelectSkeletonPose(TArray<int> FrameSearchRange);
 
 	virtual void SetupInputComponent() override;
-	
-	UFUNCTION(BlueprintCallable, Category="Animation")
-	void CreateMontage();
 
 	// Returns the time found int he sequence with the minimun rotation errors
 	float FindPoseInMontage(TMap<FName, float> BonesRotation, UAnimSequence* Sequence, TArray<int> FrameSearchRange, float* Error = nullptr);
 	FQuat GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone);
+
+	bool CheckMonatges();
+	bool CheckAllNeededAssets();
 
 public:
 
