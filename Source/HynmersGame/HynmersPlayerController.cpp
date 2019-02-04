@@ -20,19 +20,18 @@ void AHynmersPlayerController::BeginPlay()
 
 	PawnAnimationInstance = ControlledPawn->GetMesh()->GetAnimInstance();
 
-	if (!CheckMonatges()) {
-		UE_LOG(LogTemp, Error, TEXT("Some montage is missing"));
+	if (!CheckAnimAssets()) {
+		UE_LOG(LogTemp, Error, TEXT("Some sequences is missing"));
 		return;
 	}
 
 	// Init array with all the montages		Index
-	Montages.Add(WalkMontage);			//	0
-	Montages.Add(JumpMontage);			//	1
-	Montages.Add(SwimMontage);			//	2
-	Montages.Add(BoardMontage);			//	3
-	Montages.Add(BikeMontage);			//	4
-	Montages.Add(LegsMoveMontage);		//	5
-
+	Sequences.Add(WalkSequence);			//	0
+	Sequences.Add(JumpSequence);			//	1
+	Sequences.Add(SwimSequence);			//	2
+	Sequences.Add(BoardSequence);			//	3
+	Sequences.Add(BikeSequence);			//	4
+	Sequences.Add(LegsMoveSequence);		//	5
 
 	// Map Enum number
 	// Bridge		0
@@ -48,17 +47,21 @@ void AHynmersPlayerController::BeginPlay()
 	MapMontage.Add(4, 2); // Machine	Swim
 	MapMontage.Add(5, 5); // Nav		Legs
 
+	Montages.SetNum(Sequences.Num());
 
-	for (UAnimMontage* Montage : Montages) {
+	for (int i = 0; i < Sequences.Num(); i++) {
+		UAnimSequence* Sequence = Sequences[i];
+		// Creating montages
+		CreateMontage(Sequence, Montages[i]);
 
-		NumBetterFrames.Add(UKismetMathLibrary::Clamp(NumBetterFramesDefault, 0, Montage->GetNumberOfFrames()));
-		PastAnimTime.Add(SelectSkeletonPose({0, Montage->GetNumberOfFrames()}));
+		NumBetterFrames.Add(UKismetMathLibrary::Clamp(NumBetterFramesDefault, 0, Sequence->GetNumberOfFrames()));
+		PastAnimTime.Add(SelectSkeletonPose({0, Sequence->GetNumberOfFrames()}, i));
 	}
 
-	BonesAngles.Add("thigh_l", 0.f);
-	BonesAngles.Add("calf_l", 0.f);
-	BonesAngles.Add("thigh_r", 0.f);
-	BonesAngles.Add("calf_r", 0.f);
+	BonesAngles.Add("thigh_L", 0.f);
+	BonesAngles.Add("shin_L", 0.f);
+	BonesAngles.Add("thigh_R", 0.f);
+	BonesAngles.Add("shin_R", 0.f);
 
 }
 
@@ -66,7 +69,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	if (CheckAllNeededAssets()) {
+	if (CheckAllNeededAssets() && CheckMontages()) {
 
 		int32 ActiveTile = ControlledPawn->GetCurrentTile();
 
@@ -79,38 +82,37 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 		int MaxRangeValue = UKismetMathLibrary::Clamp(CurrentMontage->GetFrameAtTime(CurrentPosition) + NumSearchFrames / 2, 0, CurrentMontage->GetNumberOfFrames());
 
 		NumBetterFrames[ActiveMontageID] = UKismetMathLibrary::Clamp(NumBetterFrames[ActiveMontageID], 0, NumSearchFrames);
-		//float CurrentTime = SelectSkeletonPose(TArray<int>({MinRangeValue, MaxRangeValue},2));
+		float Error = 0;
+		float CurrentTime = SelectSkeletonPose({MinRangeValue, MaxRangeValue}, ActiveMontageID, &Error);
 
-		//	if (!bInitAccel && CurrentTime - PastAnimTime != 0) {
-		//		bInitAccel = true;
-		//	}
+		UE_LOG(LogTemp, Warning, TEXT("ERValue: %f"), Error)
 
-		//	if (bInitAccel) {
-		//		ControlledPawn->MoveForward(1.f);
-		//		PastAnimTime = CurrentTime;
-		//		if (++AccelTimes >= MaxAccelTimes) {
-		//			bInitAccel = false;
-		//			AccelTimes = 0;
-		//		}
-		//	}
+		if (!bInitAccel && CurrentTime - PastAnimTime[ActiveMontageID] != 0) {
+			bInitAccel = true;
+		}
+
+		if (bInitAccel && Error <MAxErrors[ActiveMontageID]) {
+			ControlledPawn->MoveForward(1.f);
+			PastAnimTime[ActiveMontageID] = CurrentTime;
+			if (++AccelTimes >= MaxAccelTimes) {
+				bInitAccel = false;
+				AccelTimes = 0;
+			}
+		}
 
 	}
 }
 
-float AHynmersPlayerController::SelectSkeletonPose(TArray<int> FrameSearchRange)
+float AHynmersPlayerController::SelectSkeletonPose(TArray<int> FrameSearchRange, uint32 SequenceID, float *Error)
 {
-	//float Error;
-	//float ResultTime = FindPoseInMontage(BonesAngles, WalkSequence, FrameSearchRange, &Error);
+	float ResultTime = FindPoseInMontage(BonesAngles, FrameSearchRange, SequenceID, Error);
 
-	////UE_LOG(LogTemp, Warning, TEXT("Time found = %f Err Value: %f"), ResultTime, Error);
+	// Montage reproduction control
+	PawnAnimationInstance->Montage_Play(Montages[SequenceID]);
+	PawnAnimationInstance->Montage_SetPosition(Montages[SequenceID], ResultTime);
+	PawnAnimationInstance->Montage_Pause(Montages[SequenceID]);
 
-	//// Sequence reproduction control
-	//PawnAnimationInstance->Montage_Play(WalkMontage);
-	//PawnAnimationInstance->Montage_SetPosition(WalkMontage, ResultTime);
-	//PawnAnimationInstance->Montage_Pause(WalkMontage);
-
-	//return ResultTime;
-	return 0;
+	return ResultTime;
 }
 
 void AHynmersPlayerController::SetupInputComponent()
@@ -127,61 +129,66 @@ void AHynmersPlayerController::SetupInputComponent()
 
 void AHynmersPlayerController::PosLeftThight(float rate)
 {
-	BonesAngles.Add("thigh_l", rate * 180.f / PI);
+	float Angle = -(rate * 180.f / PI) + ThighOffset;
+	Angle = (Angle < -180.f) ? 2 * 180 + Angle : Angle;
+	BonesAngles.Add("thigh_L", Angle);
 }
 
 void AHynmersPlayerController::PosLeftKnee(float rate)
 {
-	BonesAngles.Add("calf_l", rate * 180.f / PI);
+	BonesAngles.Add("shin_L", rate * 180.f / PI);
 }
 
 void AHynmersPlayerController::PosRightThight(float rate)
 {
-	BonesAngles.Add("thigh_r", rate * 180.f / PI);
+	float Angle = -(rate * 180.f / PI) + ThighOffset;
+	Angle = (Angle < -180.f) ? 2 * 180 + Angle : Angle;
+	BonesAngles.Add("thigh_R", Angle);
 }
 
 void AHynmersPlayerController::PosRightKnee(float rate)
 {
-	BonesAngles.Add("calf_r", rate * 180.f / PI);
+	BonesAngles.Add("shin_R", rate * 180.f / PI);
 }
 
-float AHynmersPlayerController::FindPoseInMontage(TMap<FName,float> BonesRotation, UAnimSequence* Sequence, TArray<int> FrameSearchRange, float* Error)
+float AHynmersPlayerController::FindPoseInMontage(TMap<FName,float> BonesRotation, TArray<int> FrameSearchRange, uint32 MontageID, float* Error)
 {
-	//if(!BonesRotation.Num() || !Sequence)
-	//	return 0.0f;
+	if(!BonesRotation.Num() || !Montages[MontageID])
+		return 0.0f;
 
-	//const int32 NumBones = BonesRotation.Num();
-	//const int32 NumFrames = FrameSearchRange[1] - FrameSearchRange[0];
+	const int32 NumBones = BonesRotation.Num();
+	const int32 NumFrames = FrameSearchRange[1] - FrameSearchRange[0];
 
-	//TArray<float> FramesFound;
-	//FramesFound.SetNum(NumFrames);
+	TArray<float> FramesFound;
+	FramesFound.SetNum(NumFrames);
 
-	//TArray<int>BetterFrames;
+	UAnimMontage* Montage = Montages[MontageID];
 
-	//for (int frame = FrameSearchRange[0]; frame < FrameSearchRange[1]; frame++) {
-	//	FramesFound[frame - FrameSearchRange[0]] = CalculateTimeValue(BonesRotation, Sequence, Sequence->GetTimeAtFrame(frame));
-	//}
-	//BetterFrames = FindMinsInArray(FramesFound, NumBetterFrames);
+	TArray<int>BetterFrames;
 
-	//TArray<float> SelectedTimes;
-	//SelectedTimes.SetNum(NumBetterFrames);
+	for (int frame = FrameSearchRange[0]; frame < FrameSearchRange[1]; frame++) {
+		FramesFound[frame - FrameSearchRange[0]] = CalculateTimeValue(BonesRotation, Sequences[MontageID], Sequences[MontageID]->GetTimeAtFrame(frame));
+	}
+	BetterFrames = FindMinsInArray(FramesFound, NumBetterFrames[MontageID]);
 
-	//TArray<float> SelectedTimesError;
-	//SelectedTimesError.SetNum(NumBetterFrames);
+	TArray<float> SelectedTimes;
+	SelectedTimes.SetNum(NumBetterFrames[MontageID]);
 
-	//for (int i = 0; i < NumBetterFrames; i++) {
-	//	float MinFrame = UKismetMathLibrary::Clamp(BetterFrames[i] + FrameSearchRange[0] - 1, 0, Sequence->GetNumberOfFrames());
-	//	float MaxFrame = UKismetMathLibrary::Clamp(BetterFrames[i] + FrameSearchRange[0] + 1, 0, Sequence->GetNumberOfFrames());
-	//	SelectedTimes[i] = FindTimeInRange(BonesRotation, TArray<float>({ Sequence->GetTimeAtFrame(MinFrame),Sequence->GetTimeAtFrame(MaxFrame) }, 2), Sequence, 0, &SelectedTimesError[i]);
-	//}
-	//int32 BestTimeIndex;
-	//float BestError;
-	//UKismetMathLibrary::MinOfFloatArray(SelectedTimesError, BestTimeIndex, BestError);
+	TArray<float> SelectedTimesError;
+	SelectedTimesError.SetNum(NumBetterFrames[MontageID]);
 
-	//if (Error)*Error = BestError;
+	for (int i = 0; i < NumBetterFrames[MontageID]; i++) {
+		float MinFrame = UKismetMathLibrary::Clamp(BetterFrames[i] + FrameSearchRange[0] - 1, 0, Montage->GetNumberOfFrames());
+		float MaxFrame = UKismetMathLibrary::Clamp(BetterFrames[i] + FrameSearchRange[0] + 1, 0, Montage->GetNumberOfFrames());
+		SelectedTimes[i] = FindTimeInRange(BonesRotation, TArray<float>({ Montage->GetTimeAtFrame(MinFrame),Montage->GetTimeAtFrame(MaxFrame) }, 2), Sequences[MontageID], 0, &SelectedTimesError[i]);
+	}
+	int32 BestTimeIndex;
+	float BestError;
+	UKismetMathLibrary::MinOfFloatArray(SelectedTimesError, BestTimeIndex, BestError);
 
-	//return SelectedTimes[BestTimeIndex];
-	return 0;
+	if (Error)*Error = BestError;
+
+	return SelectedTimes[BestTimeIndex];
 }
 
 FQuat AHynmersPlayerController::GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone)
@@ -196,14 +203,25 @@ FQuat AHynmersPlayerController::GetRefPoseQuat(TMap<FName,float> &BonesRotation,
 	return Transform.GetRotation();
 }
 
-bool AHynmersPlayerController::CheckMonatges()
+bool AHynmersPlayerController::CheckAnimAssets()
 {
-	return WalkMontage && JumpMontage && SwimMontage && BoardMontage && BikeMontage && LegsMoveMontage;
+	return WalkSequence&& JumpSequence && SwimSequence && BoardSequence && BikeSequence && LegsMoveSequence;
 }
 
 bool AHynmersPlayerController::CheckAllNeededAssets()
 {
-	return CheckMonatges() && PawnAnimationInstance;
+	return MAxErrors.Num() == Sequences.Num() && CheckAnimAssets() && PawnAnimationInstance;
+}
+
+bool AHynmersPlayerController::CheckMontages()
+{
+	for (UAnimMontage* Montage : Montages) {
+		if (Montage == nullptr) {
+			UE_LOG(LogTemp, Error, TEXT("Montage not created"));
+			return false;
+		}
+	}
+	return true;
 }
 
 TArray<int> AHynmersPlayerController::FindMinsInArray(TArray<float> Array, int32 Num)
@@ -247,16 +265,22 @@ float AHynmersPlayerController::CalculateTimeValue(TMap<FName, float> &BonesRota
 	TArray<FName> BonesKeys;
 	BonesRotation.GetKeys(BonesKeys);
 	int32 NumBones = BonesRotation.Num();
-
+	
 	for (int bone = 0; bone < NumBones; bone++) {
-		FQuat RefPoseRotation = GetRefPoseQuat(BonesRotation, bone);
+		
 		FTransform FrameTransform;
 		Sequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[bone]), Time, true);
-		FQuat FrameRotation = FrameTransform.GetRotation();
-		FRotator FrameRotator = (RefPoseRotation.Inverse()*FrameRotation).Rotator();
+		FRotator FrameRotator = FrameTransform.GetRotation().Rotator();
 		Value += ((BonesKeys[bone].ToString().Contains("thigh")) ? ThighWeight : KneeWeight)*UKismetMathLibrary::Abs(FrameRotator.Yaw - BonesRotation[BonesKeys[bone]]);
 	}
 	Value /= (float)NumBones;
 
 	return Value;
+}
+
+void AHynmersPlayerController::CreateMontage(UAnimSequence* Sequence, UAnimMontage* &OutMontage)
+{
+	if (CheckAllNeededAssets()) {
+		OutMontage = UAnimMontage::CreateSlotAnimationAsDynamicMontage(Sequence, FName("FullBody"));
+	}
 }

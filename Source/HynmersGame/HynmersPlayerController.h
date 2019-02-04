@@ -10,35 +10,39 @@
  * 
  */
 
-class UAnimMontage;
+class UAnimSequence;
 
 UCLASS()
 class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* WalkMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* WalkSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* JumpMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* JumpSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* SwimMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* SwimSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* BoardMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* BoardSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* BikeMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* BikeSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* LegsMoveMontage = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	UAnimSequence* LegsMoveSequence = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
+	TArray<float> MAxErrors;
 
 	// Animation objects
 	class AHynmersCharacter* ControlledPawn = nullptr;
 	class UAnimInstance* PawnAnimationInstance = nullptr;
 
+	TArray<UAnimSequence*> Sequences;
 	TArray<UAnimMontage*> Montages;
 	TArray<int32> NumBetterFrames;
 	TMap<int32, int32> MapMontage;
@@ -70,6 +74,9 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	float ThighWeight = 120.f / 40.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	float ThighOffset = -168.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
 	float KneeWeight = 120.f / 80.f;
 
 	TArray<int> FindMinsInArray(TArray<float> Array, int32 Num);
@@ -85,16 +92,21 @@ protected:
 
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 
-	float SelectSkeletonPose(TArray<int> FrameSearchRange);
+	float SelectSkeletonPose(TArray<int> FrameSearchRange, uint32 MontageID, float *Error=nullptr);
 
 	virtual void SetupInputComponent() override;
 
 	// Returns the time found int he sequence with the minimun rotation errors
-	float FindPoseInMontage(TMap<FName, float> BonesRotation, UAnimSequence* Sequence, TArray<int> FrameSearchRange, float* Error = nullptr);
+	float FindPoseInMontage(TMap<FName, float> BonesRotation, TArray<int> FrameSearchRange, uint32 MontageID, float* Error = nullptr);
 	FQuat GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone);
 
-	bool CheckMonatges();
+	bool CheckAnimAssets();
 	bool CheckAllNeededAssets();
+	bool CheckMontages();
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void CreateMontage(UAnimSequence* Sequence, UAnimMontage* &OutMontage);
+
 
 public:
 
