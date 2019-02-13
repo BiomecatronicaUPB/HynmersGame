@@ -30,7 +30,7 @@ struct FSkelStruct
 		TArray<FQuat> rotationAbsoluteQuaternion;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "kinect Skeleton Struct")
-		TArray<FRotator> rotationHierarchicalQuaternion;
+		TArray<FQuat> rotationHierarchicalQuaternion;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "kinect Skeleton Struct")
 		uint8 PlayerID;
@@ -44,7 +44,7 @@ struct FSkelStruct
 			rotationAbsoluteQuaternion = NewRotationAbsoluteQuaternion;
 		}
 
-		void SetSkelRotationHierarchicalQuaternion(TArray<FRotator> NewRotationHierarchicalQuaternion)
+		void SetSkelRotationHierarchicalQuaternion(TArray<FQuat> NewRotationHierarchicalQuaternion)
 		{
 			rotationHierarchicalQuaternion = NewRotationHierarchicalQuaternion;
 		}

@@ -35,70 +35,25 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
 	UAnimSequence* LegsMoveSequence = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations", meta = (AllowPrivateAccess = "true"))
-	TArray<float> MAxErrors;
-
 	// Animation objects
 	class AHynmersCharacter* ControlledPawn = nullptr;
 	class UAnimInstance* PawnAnimationInstance = nullptr;
 
+	// Variable needed for animation of sekeltal mesh
 	TArray<UAnimSequence*> Sequences;
 	TArray<UAnimMontage*> Montages;
-	TArray<int32> NumBetterFrames;
 	TMap<int32, int32> MapMontage;
-
-	// Offset between left and rigth legs
-	int32 OffsetFrame = 15;
-
-	TArray<float> PastAnimTime;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	int MaxAccelTimes = 50;
-	
-	int AccelTimes = 0;
-	bool bInitAccel = false;
-
-	// Max range amplitude to make binary search
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	int32 NumBetterFramesDefault = 6;
-
-	// Depth to stop the binary search
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	int32 BinarySearchDepth = 6;
-
-	// Range of frame to search for better frames
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	int32 NumSearchFrames = 100;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	float ThighWeight = 120.f / 40.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	float ThighOffset = -168.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
-	float KneeWeight = 120.f / 80.f;
-
-	TArray<int> FindMinsInArray(TArray<float> Array, int32 Num);
-
-	float FindTimeInRange(TMap<FName,float> BonesRotation, TArray<float> Range, UAnimSequence * Sequence, int32 CurrentDepth, float* Error);
-
-	float CalculateTimeValue(TMap<FName, float> &BonesRotation, UAnimSequence * Sequence, float  Time);
-
 	TMap<FName,float> BonesAngles;
+	TMap<FName, float> BonesOffsets;
+
+	float ConvertKinectAngle(float Rate);
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 
-	float SelectSkeletonPose(TArray<int> FrameSearchRange, uint32 MontageID, float *Error=nullptr);
-
 	virtual void SetupInputComponent() override;
-
-	// Returns the time found int he sequence with the minimun rotation errors
-	float FindPoseInMontage(TMap<FName, float> BonesRotation, TArray<int> FrameSearchRange, uint32 MontageID, float* Error = nullptr);
-	FQuat GetRefPoseQuat(TMap<FName,float> &BonesRotation, int bone);
 
 	bool CheckAnimAssets();
 	bool CheckAllNeededAssets();

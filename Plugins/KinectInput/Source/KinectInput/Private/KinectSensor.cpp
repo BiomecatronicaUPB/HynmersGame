@@ -509,7 +509,7 @@ void UKinectSensor::ProcessSkeleton(FKinectControllerState * KinectControllerSta
 	TArray<FVector> TempJointPosition;
 	TArray<FVector> TempJointRelativePosition;
 	TArray<FQuat> TempJointAbsoluteRotation;
-	TArray<FRotator> TempJointHierarchicalRotation;
+	TArray<FQuat> TempJointHierarchicalRotation;
 	TempJointPosition.Empty();
 	TempJointAbsoluteRotation.Empty();
 	TempJointHierarchicalRotation.Empty();
@@ -553,31 +553,34 @@ void UKinectSensor::ProcessSkeleton(FKinectControllerState * KinectControllerSta
 					FQuat(orientation.hierarchicalRotation.rotationQuaternion.x,
 						orientation.hierarchicalRotation.rotationQuaternion.y,
 						orientation.hierarchicalRotation.rotationQuaternion.z,
-						orientation.hierarchicalRotation.rotationQuaternion.w).Rotator());
+						orientation.hierarchicalRotation.rotationQuaternion.w)
+				);
 				
 			}
 
-			FQuat HipRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_KNEE_LEFT];
+			TArray<FQuat> RotationToUse = TempJointHierarchicalRotation;
+
+			FQuat HipRotation = RotationToUse[NUI_SKELETON_POSITION_KNEE_LEFT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::thighl].Scale =
 				atan2f(2.f*(HipRotation.X*HipRotation.W + HipRotation.Y*HipRotation.Z), 1.f - 2.f * (pow(HipRotation.Z, 2.f) + pow(HipRotation.W, 2.f)));
 
-			FQuat KneeRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_ANKLE_LEFT];
+			FQuat KneeRotation = RotationToUse[NUI_SKELETON_POSITION_ANKLE_LEFT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::kneel].Scale =
 				atan2f(2.f*(KneeRotation.X*KneeRotation.W + KneeRotation.Y*KneeRotation.Z), 1.f - 2.f * (pow(KneeRotation.Z, 2.f) + pow(KneeRotation.W, 2.f)));
 
-			FQuat AnkleRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_FOOT_LEFT];
+			FQuat AnkleRotation = RotationToUse[NUI_SKELETON_POSITION_FOOT_LEFT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::anklel].Scale =
 				atan2f(2.f*(AnkleRotation.X*AnkleRotation.W + AnkleRotation.Y*AnkleRotation.Z), 1.f - 2.f * (pow(AnkleRotation.Z, 2.f) + pow(AnkleRotation.W, 2.f)));
 
-			HipRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_KNEE_RIGHT];
+			HipRotation = RotationToUse[NUI_SKELETON_POSITION_KNEE_RIGHT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::thighr].Scale =
 				atan2f(2.f*(HipRotation.X*HipRotation.W + HipRotation.Y*HipRotation.Z), 1.f - 2.f * (pow(HipRotation.Z, 2.f) + pow(HipRotation.W, 2.f)));
 
-			KneeRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_ANKLE_RIGHT];
+			KneeRotation = RotationToUse[NUI_SKELETON_POSITION_ANKLE_RIGHT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::kneer].Scale =
 				atan2f(2.f*(KneeRotation.X*KneeRotation.W + KneeRotation.Y*KneeRotation.Z), 1.f - 2.f * (pow(KneeRotation.Z, 2.f) + pow(KneeRotation.W, 2.f)));
 
-			AnkleRotation = TempJointAbsoluteRotation[NUI_SKELETON_POSITION_FOOT_RIGHT];
+			AnkleRotation = RotationToUse[NUI_SKELETON_POSITION_FOOT_RIGHT];
 			KinectControllerStates->DegreesAxes[(int32)EKinectControllerAxes::ankler].Scale =
 				atan2f(2.f*(AnkleRotation.X*AnkleRotation.W + AnkleRotation.Y*AnkleRotation.Z), 1.f - 2.f * (pow(AnkleRotation.Z, 2.f) + pow(AnkleRotation.W, 2.f)));
 
