@@ -10,6 +10,14 @@
 #include "Animation/AnimCompositeBase.h"
 #include "Kismet/KismetMathLibrary.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
+
+AHynmersPlayerController::AHynmersPlayerController()
+{
+	// Assign Knee Weight as complementary value of the thigh weight
+	KneeWeight = 1.f - ThighWeight;
+}
+
 void AHynmersPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -48,10 +56,10 @@ void AHynmersPlayerController::BeginPlay()
 
 	Montages.SetNum(Sequences.Num());
 
-	BonesAngles.Add("thigh_L", 0.f);
-	BonesAngles.Add("shin_L", 0.f);
-	BonesAngles.Add("thigh_R", 0.f);
-	BonesAngles.Add("shin_R", 0.f);
+	BonesAngles.Add("thigh_L", 30.f);
+	BonesAngles.Add("shin_L", -61.f);
+	BonesAngles.Add("thigh_R", 30.f);
+	BonesAngles.Add("shin_R", -61.3f);
 
 	BonesOffsets.Add("thigh_L", -168.f);
 	BonesOffsets.Add("thigh_R", -168.f);
@@ -64,17 +72,17 @@ void AHynmersPlayerController::BeginPlay()
 		CreateMontage(Sequence, Montages[i]);
 	}
 
-	if (CheckAllNeededAssets()) {
+	if (ensure(CheckAllNeededAssets())) {
 		TArray<FName> BonesKeys;
 		BonesAngles.GenerateKeyArray(BonesKeys);
 
 		for (int i = 0; i < WalkSequence->GetNumberOfFrames(); i++)
 		{
+			TArray<float> AnimValues = GetAnimValues(WalkSequence, WalkSequence->GetTimeAtFrame(i), BonesKeys);
 			for (int j = 0; j < BonesKeys.Num(); j++) {
-				FTransform FrameTransform;
-				WalkSequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BonesKeys[j]), WalkSequence->GetTimeAtFrame(i), true);
-				UE_LOG(LogTemp, Warning, TEXT("Animation Frame %d %s: %f"), i, *BonesKeys[j].ToString(), (FrameTransform.GetRotation().Rotator().Yaw - BonesOffsets[BonesKeys[j]]));
+				UE_LOG(LogTemp, Warning, TEXT("Animation Frame %d %s: %f"), i, *BonesKeys[j].ToString(), AnimValues[j]);
 			}
+
 		}
 
 	}
@@ -84,14 +92,57 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
-	if (!ensure(CheckAllNeededAssets() && CheckMontages()))return;
+	if (!CheckAllNeededAssets())return;
+
+	UAnimSequence* ActiveSequence = WalkSequence;
+	UAnimMontage* ActiveMontage = Montages[0];
+
+	// Determinar un rango de frames 
+	int32 FrameRange = 6;
+
+	// Obtener los dos mejores frames seguidos
+	SetMontagePosition(ActiveMontage, 1);
+	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
+	int32 CurrentFrame = ActiveSequence->GetFrameAtTime(CurrentTime);
+
+	TArray<int32> Frames = {CurrentFrame - FrameRange/2 + (FrameRange + 1) % 2, CurrentFrame + FrameRange / 2 };
 	
-	for (auto Pair : BonesAngles)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Kinect %s: %f"), *Pair.Key.ToString(), Pair.Value);
+	TArray<FName> BonesKeys;
+	BonesAngles.GenerateKeyArray(BonesKeys);
+
+	TArray<float> FramesError;
+	for (int32 TestFrame = Frames[0]; TestFrame <= Frames[1]; TestFrame++) {
+		TArray<float> AnimValues = GetAnimValues(ActiveSequence, ActiveSequence->GetTimeAtFrame(ConvertFrame(ActiveSequence->GetNumberOfFrames(), TestFrame)), BonesKeys);
+		FramesError.Add(GetError(BonesAngles,AnimValues));
+		UE_LOG(LogTemp, Warning, TEXT("Frame: %d, Difference: %f"), TestFrame, FramesError.Last());
 	}
 
+	int BetterIndex = 0;
+	float BetterError = INFINITY;
+	for (int i = 0; i < FramesError.Num() - 1; i++) {
+		float CurrentError = FramesError[i] + FramesError[i + 1];
+		if (CurrentError < BetterError) {
+			BetterIndex = i;
+			BetterError = CurrentError;
+		}
+	}
 
+	UE_LOG(LogTemp, Warning, TEXT("BetterFrame %d"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex));
+
+	// Convertir frames a tiempo
+	// Realizar busqeuda binaria en la mitad de los dos mejores frames
+		// Si ambos frames son primero y ultimo, 
+
+
+	//TArray<float> AuxValues;
+	//BonesAngles.GenerateValueArray(AuxValues);
+
+	//AuxValues[2] += 10;
+	//AuxValues[3] += 5;
+
+	//float Error = GetError(BonesAngles, AuxValues);
+
+	//UE_LOG(LogTemp, Warning, TEXT("Difference: %f"), Error);
 }
 
 void AHynmersPlayerController::SetupInputComponent()
@@ -108,28 +159,82 @@ void AHynmersPlayerController::SetupInputComponent()
 
 void AHynmersPlayerController::PosLeftThight(float rate)
 {
-	BonesAngles.Add("thigh_L", ConvertKinectAngle(rate));
+	//BonesAngles.Add("thigh_L", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosLeftKnee(float rate)
 {
-	BonesAngles.Add("shin_L", ConvertKinectAngle(rate));
+	//BonesAngles.Add("shin_L", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosRightThight(float rate)
 {
-	BonesAngles.Add("thigh_R", ConvertKinectAngle(rate));
+	//BonesAngles.Add("thigh_R", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosRightKnee(float rate)
 {
-	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
+	//BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)
 {
 	float AngleOffset = 180;
 	return  ((Rate > 0) ? Rate * 180.f / PI - AngleOffset : Rate * 180.f / PI + AngleOffset) * -1;
+}
+
+float AHynmersPlayerController::GetError(TMap<FName, float> &BonesValues, TArray<float> &AnimValues)
+{
+	float Error = 0.f;
+
+	TArray<FName> Keys;
+	BonesValues.GenerateKeyArray(Keys);
+
+	for (int BoneIndex = 0; BoneIndex < Keys.Num(); BoneIndex++) {
+		Error += FMath::Abs( ((Keys[BoneIndex].ToString().Contains("thigh"))? ThighWeight:KneeWeight)*(BonesValues[Keys[BoneIndex]] - AnimValues[BoneIndex]) );
+	}
+	return Error;
+}
+
+TArray<float> AHynmersPlayerController::GetAnimValues(UAnimSequence* AnimSequence, float Time, TArray<FName> BoneNames)
+{
+	if (!AnimSequence)
+	{
+		UE_LOG(LogHynmersPlayer, Error, TEXT("Passed an null animations sequence"))
+		return TArray<float>();
+	}
+	// Yaw angle is the one in the sagittal plane
+	TArray<float> AnimValues;
+	for (int BoneIndex = 0;  BoneIndex < BoneNames.Num(); BoneIndex++) {
+		FTransform FrameTransform;
+		WalkSequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BoneNames[BoneIndex]), Time, true);
+		AnimValues.Add(FrameTransform.GetRotation().Rotator().Yaw - BonesOffsets[BoneNames[BoneIndex]]);
+	}
+	return AnimValues;
+}
+
+void AHynmersPlayerController::SetMontagePosition(UAnimMontage * Montage, float Time)
+{
+	if (!PawnAnimationInstance)return;
+
+	if (PawnAnimationInstance->GetCurrentActiveMontage() != Montage)
+	{
+		PawnAnimationInstance->Montage_Stop(0,PawnAnimationInstance->GetCurrentActiveMontage());
+	}
+
+	if (Time < 0 || Time > Montage->GetTimeAtFrame(Montage->GetNumberOfFrames() - 1)) {
+		UE_LOG(LogHynmersPlayer, Warning, TEXT("Out of frame bounds of active montage. Clamped to a valid frame") )
+	}
+
+	PawnAnimationInstance->Montage_Play(Montage);
+	PawnAnimationInstance->Montage_SetPosition(Montage, Time);
+	PawnAnimationInstance->Montage_Pause(Montage);
+}
+
+int32 AHynmersPlayerController::ConvertFrame(int32 NumberOfFrames, int32 FrameToCorrect)
+{
+	FrameToCorrect = (FrameToCorrect + NumberOfFrames) % NumberOfFrames;
+	return FrameToCorrect;
 }
 
 bool AHynmersPlayerController::CheckAnimAssets()
@@ -139,14 +244,14 @@ bool AHynmersPlayerController::CheckAnimAssets()
 
 bool AHynmersPlayerController::CheckAllNeededAssets()
 {
-	return CheckAnimAssets() && PawnAnimationInstance;
+	return CheckAnimAssets() && PawnAnimationInstance && CheckMontages();
 }
 
 bool AHynmersPlayerController::CheckMontages()
 {
 	for (UAnimMontage* Montage : Montages) {
 		if (Montage == nullptr) {
-			UE_LOG(LogTemp, Error, TEXT("Montage not created"));
+			UE_LOG(LogHynmersPlayer, Error, TEXT("Montage not created"));
 			return false;
 		}
 	}
@@ -155,7 +260,7 @@ bool AHynmersPlayerController::CheckMontages()
 
 void AHynmersPlayerController::CreateMontage(UAnimSequence* Sequence, UAnimMontage* &OutMontage)
 {
-	if (CheckAllNeededAssets()) {
+	if (CheckAnimAssets()) {
 		OutMontage = UAnimMontage::CreateSlotAnimationAsDynamicMontage(Sequence, FName("FullBody"));
 	}
 }
