@@ -56,10 +56,10 @@ void AHynmersPlayerController::BeginPlay()
 
 	Montages.SetNum(Sequences.Num());
 
-	BonesAngles.Add("thigh_L", 30.f);
-	BonesAngles.Add("shin_L", -61.f);
-	BonesAngles.Add("thigh_R", 30.f);
-	BonesAngles.Add("shin_R", -61.3f);
+	BonesAngles.Add("thigh_L", 0.f);
+	BonesAngles.Add("shin_L", 0.f);
+	BonesAngles.Add("thigh_R", 0.f);
+	BonesAngles.Add("shin_R", -0.f);
 
 	BonesOffsets.Add("thigh_L", -168.f);
 	BonesOffsets.Add("thigh_R", -168.f);
@@ -97,52 +97,45 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 	UAnimSequence* ActiveSequence = WalkSequence;
 	UAnimMontage* ActiveMontage = Montages[0];
 
-	// Determinar un rango de frames 
-	int32 FrameRange = 6;
-
-	// Obtener los dos mejores frames seguidos
-	SetMontagePosition(ActiveMontage, 1);
-	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
-	int32 CurrentFrame = ActiveSequence->GetFrameAtTime(CurrentTime);
-
-	TArray<int32> Frames = {CurrentFrame - FrameRange/2 + (FrameRange + 1) % 2, CurrentFrame + FrameRange / 2 };
+	FrameRange = FMath::Clamp(FrameRange, 0, ActiveSequence->GetNumberOfFrames());
+	
+	// Get two adjacente better frames
+	TArray<int32> Frames = GetFrameRange(ActiveMontage, FrameRange);
 	
 	TArray<FName> BonesKeys;
 	BonesAngles.GenerateKeyArray(BonesKeys);
 
-	TArray<float> FramesError;
-	for (int32 TestFrame = Frames[0]; TestFrame <= Frames[1]; TestFrame++) {
-		TArray<float> AnimValues = GetAnimValues(ActiveSequence, ActiveSequence->GetTimeAtFrame(ConvertFrame(ActiveSequence->GetNumberOfFrames(), TestFrame)), BonesKeys);
-		FramesError.Add(GetError(BonesAngles,AnimValues));
-		UE_LOG(LogTemp, Warning, TEXT("Frame: %d, Difference: %f"), TestFrame, FramesError.Last());
-	}
+	TArray<int32> BetterFrames = GetBetterFrames(ActiveSequence, BonesKeys, Frames);
 
-	int BetterIndex = 0;
-	float BetterError = INFINITY;
-	for (int i = 0; i < FramesError.Num() - 1; i++) {
-		float CurrentError = FramesError[i] + FramesError[i + 1];
-		if (CurrentError < BetterError) {
-			BetterIndex = i;
-			BetterError = CurrentError;
+	float BestTime;
+
+	// Only when the best frames are {last, frist}
+	if (BetterFrames[1] - BetterFrames[0] < 0)
+	{
+		TArray<float> Errors;
+		for (int32 Frame : BetterFrames) {
+			Errors.Add(GetFrameErrorInTime(ActiveSequence, ActiveSequence->GetTimeAtFrame(Frame), BonesKeys));
 		}
+		BestTime = ActiveSequence->GetTimeAtFrame((Errors[0] < Errors[1]) ? BetterFrames[0] : BetterFrames[1]);
+
+		UE_LOG(LogTemp, Warning, TEXT("Best Time: %f"), BestTime);
+		return;
 	}
+	
+	// Turn frames to times
+	TArray<float> BestTimes =
+	{
+		ActiveSequence->GetTimeAtFrame(BetterFrames[0]),
+		ActiveSequence->GetTimeAtFrame(BetterFrames[1])
+	};
 
-	UE_LOG(LogTemp, Warning, TEXT("BetterFrame %d"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex));
+	BestTime = BinarySearch(ActiveSequence, BestTimes, BonesKeys);
 
-	// Convertir frames a tiempo
-	// Realizar busqeuda binaria en la mitad de los dos mejores frames
-		// Si ambos frames son primero y ultimo, 
+	UE_LOG(LogTemp, Warning, TEXT("Best Time: %f"), BestTime);
+	
 
-
-	//TArray<float> AuxValues;
-	//BonesAngles.GenerateValueArray(AuxValues);
-
-	//AuxValues[2] += 10;
-	//AuxValues[3] += 5;
-
-	//float Error = GetError(BonesAngles, AuxValues);
-
-	//UE_LOG(LogTemp, Warning, TEXT("Difference: %f"), Error);
+	SetMontagePosition(ActiveMontage, BestTime);
+	return;
 }
 
 void AHynmersPlayerController::SetupInputComponent()
@@ -159,22 +152,22 @@ void AHynmersPlayerController::SetupInputComponent()
 
 void AHynmersPlayerController::PosLeftThight(float rate)
 {
-	//BonesAngles.Add("thigh_L", ConvertKinectAngle(rate));
+	BonesAngles.Add("thigh_L", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosLeftKnee(float rate)
 {
-	//BonesAngles.Add("shin_L", ConvertKinectAngle(rate));
+	BonesAngles.Add("shin_L", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosRightThight(float rate)
 {
-	//BonesAngles.Add("thigh_R", ConvertKinectAngle(rate));
+	BonesAngles.Add("thigh_R", ConvertKinectAngle(rate));
 }
 
 void AHynmersPlayerController::PosRightKnee(float rate)
 {
-	//BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
+	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)
@@ -207,7 +200,7 @@ TArray<float> AHynmersPlayerController::GetAnimValues(UAnimSequence* AnimSequenc
 	TArray<float> AnimValues;
 	for (int BoneIndex = 0;  BoneIndex < BoneNames.Num(); BoneIndex++) {
 		FTransform FrameTransform;
-		WalkSequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BoneNames[BoneIndex]), Time, true);
+		AnimSequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BoneNames[BoneIndex]), Time, true);
 		AnimValues.Add(FrameTransform.GetRotation().Rotator().Yaw - BonesOffsets[BoneNames[BoneIndex]]);
 	}
 	return AnimValues;
@@ -235,6 +228,74 @@ int32 AHynmersPlayerController::ConvertFrame(int32 NumberOfFrames, int32 FrameTo
 {
 	FrameToCorrect = (FrameToCorrect + NumberOfFrames) % NumberOfFrames;
 	return FrameToCorrect;
+}
+
+TArray<int32> AHynmersPlayerController::GetFrameRange(UAnimMontage * ActiveMontage, int32 FrameRange)
+{
+	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
+	int32 CurrentFrame = ActiveMontage->GetFrameAtTime(CurrentTime);
+
+	TArray<int32> Frames = { (CurrentFrame - FrameRange / 2 + (FrameRange + 1) % 2) + OffsetFramesForward, (CurrentFrame + FrameRange / 2) + OffsetFramesForward };
+	return Frames;
+}
+
+float AHynmersPlayerController::GetFrameErrorInTime(UAnimSequence* ActiveSequence, const float& FrameTime, TArray<FName> &BonesKeys)
+{
+	TArray<float> AnimValues = GetAnimValues(ActiveSequence, FrameTime, BonesKeys);
+	return GetError(BonesAngles, AnimValues);
+}
+
+TArray<int32> AHynmersPlayerController::GetBetterFrames(UAnimSequence * ActiveSequence, TArray<FName>& BonesKeys, const TArray<int32> &Frames)
+{
+	TArray<float> FramesError;
+	for (int32 CurrentFrame = Frames[0]; CurrentFrame <= Frames[1]; CurrentFrame++) {
+		FramesError.Add(GetFrameErrorInTime(ActiveSequence, ActiveSequence->GetTimeAtFrame(ConvertFrame(ActiveSequence->GetNumberOfFrames(), CurrentFrame)), BonesKeys));
+		UE_LOG(LogTemp, Warning, TEXT("Frame: %d, Difference: %f"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), CurrentFrame), FramesError.Last());
+	}
+
+	int BetterIndex = 0;
+	float BetterError = INFINITY;
+	for (int i = 0; i < FramesError.Num() - 1; i++) {
+		float CurrentError = FramesError[i] + FramesError[i + 1];
+		if (CurrentError < BetterError) {
+			BetterIndex = i;
+			BetterError = CurrentError;
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("BetterFrame %d"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex));
+
+	return { ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex + 1) };
+}
+
+float AHynmersPlayerController::BinarySearch(UAnimSequence* ActiveSequence, const TArray<float> &BetterTimes, TArray<FName> &BonesKeys, int32 Depth)
+{
+	TArray<float> NewTimes = { BetterTimes[0], (BetterTimes[0] + BetterTimes[1]) / 2, BetterTimes[1] };
+
+	TArray<float> TimeErrors;
+	for (float CurrentTime : NewTimes) {
+		TimeErrors.Add(GetFrameErrorInTime(ActiveSequence, CurrentTime, BonesKeys));
+	}
+
+	int BetterIndex = 0;
+	float BetterError = INFINITY;
+	for (int i = 0; i < BetterTimes.Num() - 1; i++) {
+		float CurrentError = TimeErrors[i] + TimeErrors[i + 1];
+		if (CurrentError < BetterError) {
+			BetterIndex = i;
+			BetterError = CurrentError;
+		}
+	}
+
+	if (Depth < BinarySearchDepth)
+	{
+		return BinarySearch(ActiveSequence, { NewTimes[BetterIndex],NewTimes[BetterIndex +1] }, BonesKeys, ++Depth);
+	}
+
+	int32 BestTimeIndex;
+	FMath::Min(TimeErrors, &BestTimeIndex);
+
+	return NewTimes[BestTimeIndex];
 }
 
 bool AHynmersPlayerController::CheckAnimAssets()

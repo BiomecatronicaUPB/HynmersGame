@@ -38,8 +38,20 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 
 	/// -------------------------------------------Algorithm parameters ----------------------------------------------------------------------------------------
 	// Influence of the thigh in the final error. The knee influence would be the complementary value
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Walk Curve", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
 	float ThighWeight = 0.8f;
+
+	// Depth to stop the binary search
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	int32 BinarySearchDepth = 6;
+
+	// Number of frames to search
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	int32 FrameRange = 10;
+
+	// Number of frame forward
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	int32 OffsetFramesForward = 0;
 
 	// Influence of the knee in the final error
 	float KneeWeight =0.2f;
@@ -72,6 +84,14 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	void SetMontagePosition(UAnimMontage* Montage, float Time);
 	// Convert frames as the animation is a loop aniamtion
 	int32 ConvertFrame(int32 NumberOfFrames, int32 FrameToCorrect);
+	// Return Min frame and Max frame that acomplish the number of rames specified by frame range with Current frame as center
+	TArray<int32> GetFrameRange(UAnimMontage* ActiveMontage, int32 FrameRange);
+	// Get Error of the specified frame
+	float GetFrameErrorInTime(UAnimSequence* ActiveSequence, const float& FrameTime, TArray<FName> &BonesKeys);
+	// Get two adjacent frames with the least combined error
+	TArray<int32> GetBetterFrames(UAnimSequence* ActiveSequence, TArray<FName> &BonesKeys, const TArray<int32> &Frames);
+	// Return time with least error in the frame range
+	float BinarySearch(UAnimSequence* ActiveSequence, const TArray<float> &BetterTimes, TArray<FName> &BonesKeys, int32 Depth = 0);
 	/// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
