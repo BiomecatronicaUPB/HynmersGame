@@ -62,9 +62,11 @@ void AHynmersPlayerController::BeginPlay()
 		TArray<FName> BonesKeys;
 		BonesAngles.GenerateKeyArray(BonesKeys);
 
-		for (int i = 0; i < WalkSequence->GetNumberOfFrames(); i++)
+		UAnimSequence* DataSequence = Sequences[(int32)ControlledPawn->GetActiveTile()];
+
+		for (int i = 0; i < DataSequence->GetNumberOfFrames(); i++)
 		{
-			TArray<float> AnimValues = GetAnimValues(WalkSequence, WalkSequence->GetTimeAtFrame(i), BonesKeys);
+			TArray<float> AnimValues = GetAnimValues(DataSequence, DataSequence->GetTimeAtFrame(i), BonesKeys);
 			for (int j = 0; j < BonesKeys.Num(); j++) {
 				UE_LOG(LogTemp, Warning, TEXT("Animation Frame %d %s: %f"), i, *BonesKeys[j].ToString(), AnimValues[j]);
 			}
