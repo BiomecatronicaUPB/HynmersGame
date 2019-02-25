@@ -32,27 +32,13 @@ void AHynmersPlayerController::BeginPlay()
 		return;
 	}
 
-	// Init array with all the montages		Index
-	Sequences.Add(WalkSequence);			//	0
-	Sequences.Add(JumpSequence);			//	1
-	Sequences.Add(SwimSequence);			//	2
-	Sequences.Add(BoardSequence);			//	3
-	Sequences.Add(BikeSequence);			//	4
-	Sequences.Add(LegsMoveSequence);		//	5
-
-	// Map Enum number
-	// Bridge		0
-	// Rooms		1
-	// Labs			2
-	// Com			3
-	// Machine		4
-	// Nav			5
-	MapMontage.Add(0, 0); // Bridge		Walk
-	MapMontage.Add(1, 3); // Rooms		Board
-	MapMontage.Add(2, 1); // Labs		Jump
-	MapMontage.Add(3, 4); // Com		Bike
-	MapMontage.Add(4, 2); // Machine	Swim
-	MapMontage.Add(5, 5); // Nav		Legs
+	// Init array with all the animations		Index
+	Sequences.Add(WalkSequence);				//	0
+	Sequences.Add(JumpSequence);				//	1
+	Sequences.Add(SwimSequence);				//	2
+	Sequences.Add(BoardSequence);				//	3
+	Sequences.Add(BikeSequence);				//	4
+	Sequences.Add(LegsMoveSequence);			//	5
 
 	Montages.SetNum(Sequences.Num());
 
@@ -94,13 +80,17 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 
 	if (!CheckAllNeededAssets())return;
 
-	UAnimSequence* ActiveSequence = WalkSequence;
-	UAnimMontage* ActiveMontage = Montages[0];
+	ActiveTile = ControlledPawn->GetActiveTile();
 
-	FrameRange = FMath::Clamp(FrameRange, 0, ActiveSequence->GetNumberOfFrames());
+	UAnimSequence* ActiveSequence = Sequences[(int32)ActiveTile];
+	UAnimMontage* ActiveMontage = Montages[(int32)ActiveTile];
+
+	int32 ActiveFrameRange = AnimationSpecificFrameRange.Contains(ActiveTile) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
+
+	ActiveFrameRange = FMath::Clamp(ActiveFrameRange, 0, ActiveSequence->GetNumberOfFrames());
 	
 	// Get two adjacente better frames
-	TArray<int32> Frames = GetFrameRange(ActiveMontage, FrameRange);
+	TArray<int32> Frames = GetFrameRange(ActiveMontage, ActiveFrameRange);
 	
 	TArray<FName> BonesKeys;
 	BonesAngles.GenerateKeyArray(BonesKeys);
@@ -152,7 +142,11 @@ void AHynmersPlayerController::SetupInputComponent()
 
 void AHynmersPlayerController::PosLeftThight(float rate)
 {
-	BonesAngles.Add("thigh_L", ConvertKinectAngle(rate));
+	float Angle = ConvertKinectAngle(rate);
+	if (AnimationSpecificThighLOffset.Contains(ActiveTile)) {
+		Angle += AnimationSpecificThighLOffset[ActiveTile];
+	}
+	BonesAngles.Add("thigh_L", Angle);
 }
 
 void AHynmersPlayerController::PosLeftKnee(float rate)
@@ -162,7 +156,11 @@ void AHynmersPlayerController::PosLeftKnee(float rate)
 
 void AHynmersPlayerController::PosRightThight(float rate)
 {
-	BonesAngles.Add("thigh_R", ConvertKinectAngle(rate));
+	float Angle = ConvertKinectAngle(rate);
+	if (AnimationSpecificThighROffset.Contains(ActiveTile)) {
+		Angle += AnimationSpecificThighROffset[ActiveTile];
+	}
+	BonesAngles.Add("thigh_R", Angle);
 }
 
 void AHynmersPlayerController::PosRightKnee(float rate)
@@ -235,7 +233,7 @@ TArray<int32> AHynmersPlayerController::GetFrameRange(UAnimMontage * ActiveMonta
 	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
 	int32 CurrentFrame = ActiveMontage->GetFrameAtTime(CurrentTime);
 
-	TArray<int32> Frames = { (CurrentFrame - FrameRange / 2 + (FrameRange + 1) % 2) + OffsetFramesForward, (CurrentFrame + FrameRange / 2) + OffsetFramesForward };
+	TArray<int32> Frames = { CurrentFrame + OffsetFrames, CurrentFrame + FrameRange -1 + OffsetFrames };
 	return Frames;
 }
 

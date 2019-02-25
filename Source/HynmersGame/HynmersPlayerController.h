@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HynmersGame.h"
 #include "GameFramework/PlayerController.h"
 #include "HynmersPlayerController.generated.h"
 
@@ -45,13 +46,25 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
 	int32 BinarySearchDepth = 6;
 
-	// Number of frames to search
+	// Default number of frames to search
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
 	int32 FrameRange = 10;
 
-	// Number of frame forward
+	// Default number of frame forward
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
-	int32 OffsetFramesForward = 0;
+	int32 OffsetFrames = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	TMap<EActiveTile, int32> AnimationSpecificFrameRange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	TMap<EActiveTile, int32> AnimationSpecificFramesOffset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	TMap<EActiveTile, int32> AnimationSpecificThighLOffset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Algorithm", meta = (AllowPrivateAccess = "true"))
+	TMap<EActiveTile, int32> AnimationSpecificThighROffset;
 
 	// Influence of the knee in the final error
 	float KneeWeight =0.2f;
@@ -66,12 +79,12 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	TArray<UAnimSequence*> Sequences;
 	// Montages created of the sequeces. To put and specific frame in the game
 	TArray<UAnimMontage*> Montages;
-	// Map montages with maps
-	TMap<int32, int32> MapMontage;
 	// Angles read ir from the kinec with their corresponding bone names
 	TMap<FName,float> BonesAngles;
 	// Offset for each bones in aniamtion sequences
 	TMap<FName, float> BonesOffsets;
+
+	EActiveTile ActiveTile;
 	/// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	// Function that conver radians to angles and move to 0

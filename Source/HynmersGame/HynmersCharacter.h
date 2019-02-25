@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include <fstream>
+#include "HynmersGame.h"
 #include "GameFramework/Character.h"
 #include "HynmersCharacter.generated.h"
 
@@ -36,9 +36,9 @@ class AHynmersCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
 	bool bReadyToSwim = false;
 
-	float Rate[4];
-
-
+	// TODO change for VisibleAnywhere
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
+	EActiveTile ActiveTile;
 
 public:
 	AHynmersCharacter(const FObjectInitializer& ObjectInitializer);
@@ -51,6 +51,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
 	bool bInteractWith = false;
+
 
 
 protected:
@@ -113,6 +114,9 @@ public:
 	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UHynmersCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE EActiveTile GetActiveTile() { return ActiveTile; }
 
 };
 
