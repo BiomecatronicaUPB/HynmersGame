@@ -91,7 +91,6 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 
 	ActiveFrameRange = FMath::Clamp(ActiveFrameRange, 0, ActiveSequence->GetNumberOfFrames());
 	
-	// Get two adjacente better frames
 	TArray<int32> Frames = GetFrameRange(ActiveMontage, ActiveFrameRange);
 	
 	TArray<FName> BonesKeys;
@@ -110,22 +109,24 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 		}
 		BestTime = ActiveSequence->GetTimeAtFrame((Errors[0] < Errors[1]) ? BetterFrames[0] : BetterFrames[1]);
 
-		UE_LOG(LogTemp, Warning, TEXT("Best Time: %f"), BestTime);
-		return;
 	}
-	
-	// Turn frames to times
-	TArray<float> BestTimes =
-	{
-		ActiveSequence->GetTimeAtFrame(BetterFrames[0]),
-		ActiveSequence->GetTimeAtFrame(BetterFrames[1])
-	};
+	else {
+		// Turn frames to times
+		TArray<float> BestTimes =
+		{
+			ActiveSequence->GetTimeAtFrame(BetterFrames[0]),
+			ActiveSequence->GetTimeAtFrame(BetterFrames[1])
+		};
 
-	BestTime = BinarySearch(ActiveSequence, BestTimes, BonesKeys);
+		BestTime = BinarySearch(ActiveSequence, BestTimes, BonesKeys);
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Best Time: %f"), BestTime);
-	
 
+	float CurrentTime =  PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
+
+	TriggerNotifies(ActiveSequence, CurrentTime, BestTime);
+	
 	SetMontagePosition(ActiveMontage, BestTime);
 	return;
 }
@@ -296,6 +297,16 @@ float AHynmersPlayerController::BinarySearch(UAnimSequence* ActiveSequence, cons
 	FMath::Min(TimeErrors, &BestTimeIndex);
 
 	return NewTimes[BestTimeIndex];
+}
+
+void AHynmersPlayerController::TriggerNotifies(UAnimSequence * ActiveSequence, float CurrentTime, float BestTime)
+{
+	TArray<FAnimNotifyEventReference> Notifies;
+	ActiveSequence->GetAnimNotifiesFromDeltaPositions(CurrentTime, BestTime, Notifies);
+
+	for (FAnimNotifyEventReference NotifyToSend : Notifies) {
+		PawnAnimationInstance->TriggerSingleAnimNotify(NotifyToSend.GetNotify());
+	}
 }
 
 bool AHynmersPlayerController::CheckAnimAssets()

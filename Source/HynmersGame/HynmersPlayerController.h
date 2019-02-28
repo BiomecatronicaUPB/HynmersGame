@@ -105,6 +105,8 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	TArray<int32> GetBetterFrames(UAnimSequence* ActiveSequence, TArray<FName> &BonesKeys, const TArray<int32> &Frames);
 	// Return time with least error in the frame range
 	float BinarySearch(UAnimSequence* ActiveSequence, const TArray<float> &BetterTimes, TArray<FName> &BonesKeys, int32 Depth = 0);
+
+	void TriggerNotifies(UAnimSequence * ActiveSequence, float CurrentTime, float BestTime);
 	/// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
