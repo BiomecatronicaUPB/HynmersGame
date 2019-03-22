@@ -8,13 +8,18 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
+#include "Engine/Texture.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+
+#include "HExerciseWidget.h"
 
 UHMainMenu::UHMainMenu(const FObjectInitializer & ObjectInitializer):Super(ObjectInitializer)
 {
-	ConstructorHelpers::FClassFinder<UUserWidget> ExerciseWidgetBP(TEXT("/Game/Hynmers/UI/WBP_ExerciseWidget"));
+	ConstructorHelpers::FClassFinder<UHExerciseWidget> ExerciseWidgetBP(TEXT("/Game/Hynmers/UI/WBP_ExerciseWidget"));
 	if (!ensure(ExerciseWidgetBP.Class)) return;
 
-	ExerciseWidget = ExerciseWidgetBP.Class;
+	ExerciseWidgetClass = ExerciseWidgetBP.Class;
 }
 
 bool UHMainMenu::Initialize()
@@ -33,6 +38,25 @@ bool UHMainMenu::Initialize()
 
 	if (!ensure(btn_Return)) return false;
 	btn_Return->OnClicked.AddDynamic(this, &UHMainMenu::ReturnToPatient);
+
+	if (!ensure(btn_Gate))return false;
+	btn_Gate->OnClicked.AddDynamic(this, &UHMainMenu::OnGate);
+
+	if (!ensure(btn_Jump))return false;
+	btn_Jump->OnClicked.AddDynamic(this, &UHMainMenu::OnJump);
+
+	if (!ensure(btn_Swim))return false;
+	btn_Swim->OnClicked.AddDynamic(this, &UHMainMenu::OnSwim);
+
+	if (!ensure(btn_Bike))return false;
+	btn_Bike->OnClicked.AddDynamic(this, &UHMainMenu::OnBike);
+
+	if (!ensure(btn_Board))return false;
+	btn_Board->OnClicked.AddDynamic(this, &UHMainMenu::OnBoard);
+
+	if (!ensure(btn_Legs))return false;
+	btn_Legs->OnClicked.AddDynamic(this, &UHMainMenu::OnLegs);
+
 
 	return true;
 }
@@ -55,4 +79,94 @@ void UHMainMenu::IngressPatien()
 void UHMainMenu::ReturnToPatient()
 {
 	MenuSwitcher->SetActiveWidget(SelectPatient);
+}
+
+void UHMainMenu::OnGate()
+{
+	int32 ExerciseIndex = 0;
+	FString ExerciseName = "Gate";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+
+void UHMainMenu::OnJump()
+{
+	int32 ExerciseIndex = 1;
+	FString ExerciseName = "Jump";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+void UHMainMenu::OnSwim()
+{
+	int32 ExerciseIndex = 2;
+	FString ExerciseName = "Swim";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+void UHMainMenu::OnBike()
+{
+	int32 ExerciseIndex = 3;
+	FString ExerciseName = "Bike";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+void UHMainMenu::OnBoard()
+{
+	int32 ExerciseIndex = 4;
+	FString ExerciseName = "Board";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+void UHMainMenu::OnLegs()
+{
+	int32 ExerciseIndex = 5;
+	FString ExerciseName = "Legs";
+
+	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
+
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+}
+
+void UHMainMenu::ExecOnExerciseWidgetOpen(UTexture2D * ImageToSet, FString ExerciseDescription)
+{
+	if (!ExerciseWidgetClass)return;
+
+	UHExerciseWidget* ExeriseWidget = Cast<UHExerciseWidget>(CreateWidget<UUserWidget>(GetWorld(), ExerciseWidgetClass));
+	if (!ExeriseWidget) return;
+
+	ExeriseWidget->img_Image->SetBrushFromTexture(ImageToSet);
+	ExeriseWidget->txt_Description->SetText(FText::FromString(ExerciseDescription));
+
+
+	ExeriseWidget->Setup();
+}
+
+bool UHMainMenu::CheckImageDesc(const int32 &ExerciseIndex, FString &ExerciseName)
+{
+	if (!ExercisesList.IsValidIndex(ExerciseIndex))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Image for exercises %s is missing"), *ExerciseName);
+		return false;
+	}
+	if (!ExercisesDescription.IsValidIndex(ExerciseIndex))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Description for exercises %s is missing"), *ExerciseName);
+		return false;
+	}
+	return true;
 }

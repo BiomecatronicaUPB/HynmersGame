@@ -16,7 +16,7 @@ class HYNMERSGAME_API UHMenuWidget : public UUserWidget
 	
 public:
 	void Setup();
-	void Teardown();
+	virtual void Teardown();
 	
 	
 };
