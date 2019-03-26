@@ -18,7 +18,7 @@ class HYNMERSGAME_API UHMainMenu : public UHMenuWidget
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
-
+	
 	UPROPERTY(meta = (BindWidget))
 	UWidget* SelectPatient;
 
@@ -29,7 +29,7 @@ class HYNMERSGAME_API UHMainMenu : public UHMenuWidget
 	class UButton* btn_Exit;
 
 	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* tb_Patient;
+	class UEditableTextBox* etb_Patient;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* btn_Ingress;
@@ -63,7 +63,7 @@ class HYNMERSGAME_API UHMainMenu : public UHMenuWidget
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Exercises", meta = (AllowPrivateAccess = "true"))
 	TArray<FString> ExercisesDescription;
-
+	
 	UFUNCTION()
 	void ExitGame();
 
@@ -94,14 +94,14 @@ class HYNMERSGAME_API UHMainMenu : public UHMenuWidget
 	UFUNCTION()
 	void OnLegs();
 
-	void ExecOnExerciseWidgetOpen(UTexture2D* ImageToSet, FString ExerciseDescription);
+	void ExecOnExerciseWidgetOpen(UTexture2D* ImageToSet, FString ExerciseDescription, int32 ExerciseIndex);
 
 	bool CheckImageDesc(const int32 &ExerciseIndex, FString &ExerciseName);
 
 
-
 public:
 	UHMainMenu(const FObjectInitializer & ObjectInitializer);
+
 
 protected:
 	virtual bool Initialize() override;

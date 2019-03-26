@@ -14,9 +14,13 @@ class HYNMERSGAME_API UHMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+protected:
+	class UHGameInstance* GameInstance;
+
 public:
 	void Setup();
 	virtual void Teardown();
 	
-	
+
+	void SetGameInstance(UHGameInstance* CurrentGameInstance);
 };

@@ -5,6 +5,7 @@
 #include "HynmersSaveGame.h"
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "HGameInstance.h"
 #include "HynmersGameGameMode.generated.h"
 
 class UHynmersSaveGame;
@@ -14,6 +15,8 @@ UCLASS(minimalapi)
 class AHynmersGameGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	UHGameInstance* GameInstance;
 
 public:
 	AHynmersGameGameMode();
@@ -57,6 +60,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
 	int32 MaxGenerationTries = 100;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
+	TArray<FSessionInfo> GameSessionInfo;
 
 	// Angle in degrees
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")

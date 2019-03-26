@@ -11,8 +11,11 @@
 #include "Engine/Texture.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/EditableTextBox.h"
 
 #include "HExerciseWidget.h"
+#include "HynmersGame.h"
+#include "HGameInstance.h"
 
 UHMainMenu::UHMainMenu(const FObjectInitializer & ObjectInitializer):Super(ObjectInitializer)
 {
@@ -68,11 +71,16 @@ void UHMainMenu::ExitGame()
 
 void UHMainMenu::StartGame()
 {
-
+	if (!GameInstance)return;
+	GameInstance->StartGame();
 }
 
 void UHMainMenu::IngressPatien()
 {
+	if (!GameInstance)return;
+
+	GameInstance->PatientName = etb_Patient->GetText().ToString();
+	GameInstance->PatientName = (GameInstance->PatientName.IsEmpty()) ? "Default" : GameInstance->PatientName;
 	MenuSwitcher->SetActiveWidget(SelectExercises);
 }
 
@@ -88,7 +96,7 @@ void UHMainMenu::OnGate()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Bridge);
 }
 
 
@@ -99,7 +107,7 @@ void UHMainMenu::OnJump()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Lab);
 }
 
 void UHMainMenu::OnSwim()
@@ -109,7 +117,7 @@ void UHMainMenu::OnSwim()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Machine);
 }
 
 void UHMainMenu::OnBike()
@@ -119,7 +127,7 @@ void UHMainMenu::OnBike()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Com);
 }
 
 void UHMainMenu::OnBoard()
@@ -129,7 +137,7 @@ void UHMainMenu::OnBoard()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Rooms);
 }
 
 void UHMainMenu::OnLegs()
@@ -139,21 +147,22 @@ void UHMainMenu::OnLegs()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex]);
+	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Nav);
 }
 
-void UHMainMenu::ExecOnExerciseWidgetOpen(UTexture2D * ImageToSet, FString ExerciseDescription)
+void UHMainMenu::ExecOnExerciseWidgetOpen(UTexture2D * ImageToSet, FString ExerciseDescription, int32 ExerciseIndex)
 {
 	if (!ExerciseWidgetClass)return;
 
-	UHExerciseWidget* ExeriseWidget = Cast<UHExerciseWidget>(CreateWidget<UUserWidget>(GetWorld(), ExerciseWidgetClass));
-	if (!ExeriseWidget) return;
+	UHExerciseWidget* ExerciseWidget = Cast<UHExerciseWidget>(CreateWidget<UUserWidget>(GetWorld(), ExerciseWidgetClass));
+	if (!ExerciseWidget) return;
 
-	ExeriseWidget->img_Image->SetBrushFromTexture(ImageToSet);
-	ExeriseWidget->txt_Description->SetText(FText::FromString(ExerciseDescription));
+	ExerciseWidget->img_Image->SetBrushFromTexture(ImageToSet, true);
+	ExerciseWidget->txt_Description->SetText(FText::FromString(ExerciseDescription));
+	ExerciseWidget->ExerciseIndex = ExerciseIndex;
+	ExerciseWidget->SetGameInstance(GameInstance);
 
-
-	ExeriseWidget->Setup();
+	ExerciseWidget->Setup();
 }
 
 bool UHMainMenu::CheckImageDesc(const int32 &ExerciseIndex, FString &ExerciseName)

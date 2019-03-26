@@ -53,6 +53,7 @@ class HYNMERSGAME_API UHExerciseWidget : public UHMenuWidget
 	UPROPERTY(meta = (BindWidget))
 	UEditableTextBox* etb_KneeRI;
 
+
 	UFUNCTION()
 		void OnAdd();
 
@@ -73,6 +74,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* txt_Description;
 
-	virtual void Teardown() override;
+	int32 ExerciseIndex;
 
+	virtual void Teardown() override;
+	
 };

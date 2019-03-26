@@ -37,3 +37,8 @@ void UHMenuWidget::Teardown()
 
 	PlayerController->bShowMouseCursor = false;
 }
+
+void UHMenuWidget::SetGameInstance(UHGameInstance * CurrentGameInstance)
+{
+	GameInstance = CurrentGameInstance;
+}

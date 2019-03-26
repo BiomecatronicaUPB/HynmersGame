@@ -11,6 +11,8 @@
 #include "HynmersConnector.h"
 #include "Components/BoxComponent.h"
 
+#include "HGameInstance.h"
+
 AHynmersGameGameMode::AHynmersGameGameMode()
 	: Super()
 {
@@ -27,6 +29,13 @@ void AHynmersGameGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	InitBlueprints();
+
+	GameInstance = Cast<UHGameInstance>(GetGameInstance());
+	if (!GameInstance)return;
+
+	SlotName = GameInstance->PatientName;
+	GameInstance->GetGameSessionInfo(GameSessionInfo);
+
 	MapSaved = LoadSavedGameData();
 
 	if (ensure(MapSaved)) {
