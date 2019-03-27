@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "HGameInstance.h"
+#include "HynmersGame.h" 
 #include "HynmersGameGameMode.generated.h"
 
 class UHynmersSaveGame;
@@ -28,6 +29,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+	bool SpawnCurrentSession();
+	
 	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
 	void InitBlueprints();
 
@@ -49,6 +53,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
 	AActor* CheckMachineRoom(const TArray<TSubclassOf<AActor>>& TilesToBeSpawned, int32& TileIndex);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Utility")
+	void ShuffleArray(TArray<TSubclassOf<AActor>>& Array);
+
 	UPROPERTY(BlueprintReadWrite, Category = "SavedGame")
 	UHynmersSaveGame* MapSaved = nullptr;
 
@@ -63,6 +70,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
 	TArray<FSessionInfo> GameSessionInfo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
+	TMap<EActiveTile, TSubclassOf<class AHynmersBaseTile>> Tiles;
 
 	// Angle in degrees
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")

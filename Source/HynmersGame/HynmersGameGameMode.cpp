@@ -10,11 +10,11 @@
 #include "HynmersBaseTile.h"
 #include "HynmersConnector.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/KismetArrayLibrary.h"
 
 #include "HGameInstance.h"
 
 AHynmersGameGameMode::AHynmersGameGameMode()
-	: Super()
 {
 	// set default pawn class to our Blueprinted character
 	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Test/FirstPersonCPP/Blueprints/FirstPersonCharacter"));
@@ -44,6 +44,27 @@ void AHynmersGameGameMode::BeginPlay()
 		}
 		PostBeginPlay();
 	}
+
+	SpawnCurrentSession();
+}
+
+bool AHynmersGameGameMode::SpawnCurrentSession()
+{
+	if (Tiles.Num() < (int32)EActiveTile::TotalTiles)return false;
+
+	TArray<TSubclassOf<AActor>> OutputTiles;
+
+	for (FSessionInfo CurrentExercise : GameSessionInfo)
+	{
+		if(Tiles.Contains((EActiveTile)CurrentExercise.ExerciseIndex) && CurrentExercise.ExerciseIndex != (int32)EActiveTile::Bridge)
+			OutputTiles.Add(Tiles[(EActiveTile)CurrentExercise.ExerciseIndex]);
+	}
+
+	ShuffleArray(OutputTiles);
+	TArray<FVector> Locations;
+	SpawnSessionMap({ Locations, FTransform::Identity, OutputTiles });
+
+	return true;
 }
 
 bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
