@@ -141,6 +141,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 		DistanceToMove +=(DeltaFrame * DistanceStepFrames);
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
 
 	if (DistanceMoved <= DistanceToMove) {
 		DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();
@@ -150,7 +151,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 
 	if (TagetRepetitions != 0 && NumberOfRepetitions >= TagetRepetitions)
 	{
-		NumberOfRepetitions = 0;
+		bCanPick = false;
 		TagetRepetitions = 0;
 		OnFinishRepetitions();
 		ControlledPawn->bCanMoveWithController = true;
@@ -209,7 +210,7 @@ void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int3
 
 	DistanceToPickUpActor = ControlledPawn->GetDistanceTo(CurrentActor);
 
-	DistanceStep = DistanceToPickUpActor / (float)NumReps;
+	DistanceStep = DistanceToPickUpActor / ((float)NumReps+1);
 	TagetRepetitions = NumReps;
 
 	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
@@ -221,6 +222,10 @@ void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int3
 	DistanceMoved = 0.f;
 
 	ControlledPawn->bCanMoveWithController = false;
+
+	NumberOfRepetitions = 0;
+
+	bCanPick = true;
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)

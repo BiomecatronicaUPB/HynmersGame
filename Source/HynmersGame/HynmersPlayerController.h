@@ -133,6 +133,8 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	float DistanceToMove;
 
 	float DistanceMoved = 0.f;
+
+	bool bCanPick = true;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
