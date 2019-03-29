@@ -117,13 +117,22 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	float DistanceToPickUpActor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
-	float MaxSpeed;
+	float MaxSpeed = 148.2f;
 
 	UPROPERTY(BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
 	float DistanceStep;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
 	float DistanceStepFrames;
+
+	FVector PreviousLocation;
+
+	int32 TagetRepetitions;
+	int32 NumberOfRepetitions = 0;
+
+	float DistanceToMove;
+
+	float DistanceMoved = 0.f;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
@@ -156,4 +165,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void PostBeginPlay();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void OnFinishRepetitions();
 };

@@ -10,6 +10,8 @@
 #include "Animation/AnimCompositeBase.h"
 #include "Kismet/KismetMathLibrary.h"
 
+#include "HynmersMovementComponent.h"
+
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
 
 AHynmersPlayerController::AHynmersPlayerController()
@@ -58,7 +60,11 @@ void AHynmersPlayerController::BeginPlay()
 		CreateMontage(Sequence, Montages[i]);
 	}
 
-	ensure(CheckAllNeededAssets());
+	if (ensure(CheckAllNeededAssets()))
+	{
+		PostBeginPlay();
+	}
+
 
 }
 
@@ -67,11 +73,12 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
 	if (!CheckAllNeededAssets())return;
-
+	
 	ActiveTile = ControlledPawn->GetActiveTile();
 
 	UAnimSequence* ActiveSequence = Sequences[(int32)ActiveTile];
 	UAnimMontage* ActiveMontage = Montages[(int32)ActiveTile];
+
 
 	int32 ActiveFrameRange = AnimationSpecificFrameRange.Contains(ActiveTile) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
 
@@ -112,6 +119,43 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 	TriggerNotifies(ActiveSequence, CurrentTime, BestTime);
 	
 	SetMontagePosition(ActiveMontage, BestTime);
+
+	/// Movement algorithm
+
+	int32 CurrentFrame = ActiveSequence->GetFrameAtTime(CurrentTime);
+	int32 NewFrame = ActiveSequence->GetFrameAtTime(BestTime);
+
+	int32 DeltaFrame = NewFrame - CurrentFrame;
+	int32 DeltaFrameConverted = ActiveSequence->GetNumberOfFrames() + NewFrame - CurrentFrame;
+	int32 EvalFrameRate = (AnimationSpecificFrameRange.Contains(ActiveTile)) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
+
+	if (DeltaFrame < 0)
+	{
+		DeltaFrame = DeltaFrameConverted;
+		
+		if(DeltaFrame <= EvalFrameRate)
+			NumberOfRepetitions++;
+	}
+
+	if (DeltaFrame != 0 && DeltaFrame <= EvalFrameRate) {
+		DistanceToMove +=(DeltaFrame * DistanceStepFrames);
+	}
+
+
+	if (DistanceMoved <= DistanceToMove) {
+		DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();
+		PreviousLocation = ControlledPawn->GetActorLocation();
+		ControlledPawn->MoveForward(1.f);
+	}
+
+	if (TagetRepetitions != 0 && NumberOfRepetitions >= TagetRepetitions)
+	{
+		NumberOfRepetitions = 0;
+		TagetRepetitions = 0;
+		OnFinishRepetitions();
+		ControlledPawn->bCanMoveWithController = true;
+	}
+
 	return;
 }
 
@@ -162,14 +206,21 @@ void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int3
 	if (!CheckAnimAssets()) return;
 
 	ActivePickUpActor = CurrentActor;
-	DistanceToPickUpActor = GetPawn()->GetDistanceTo(CurrentActor);
+
+	DistanceToPickUpActor = ControlledPawn->GetDistanceTo(CurrentActor);
 
 	DistanceStep = DistanceToPickUpActor / (float)NumReps;
+	TagetRepetitions = NumReps;
 
 	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
 
+	DistanceToMove = DistanceStepFrames;
 
-	UE_LOG(LogTemp, Warning, TEXT("Distance to target: %f, Distance step: %f, Distance frame %f, for frames:%d"), DistanceToPickUpActor, DistanceStep, DistanceStepFrames, Sequences[(int32)ActiveTile]->GetNumberOfFrames())
+	PreviousLocation = ControlledPawn->GetActorLocation();
+
+	DistanceMoved = 0.f;
+
+	ControlledPawn->bCanMoveWithController = false;
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)

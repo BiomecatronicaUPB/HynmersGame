@@ -110,7 +110,7 @@ void AHynmersCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AHynmersCharacter::OnResetVR);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AHynmersCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AHynmersCharacter::MoveForwardInput);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AHynmersCharacter::MoveRight);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
@@ -133,6 +133,14 @@ void AHynmersCharacter::MoveForward(float Value)
 	{
 		// add movement in that direction
 		AddMovementInput((bReadyToSwim)?GetActorUpVector():GetRootComponent()->GetForwardVector(), Value);
+	}
+}
+
+void AHynmersCharacter::MoveForwardInput(float Val)
+{
+	if (bCanMoveWithController)
+	{
+		MoveForward(Val);
 	}
 }
 

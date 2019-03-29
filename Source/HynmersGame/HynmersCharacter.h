@@ -52,6 +52,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
 	bool bInteractWith = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
+	bool bCanMoveWithController = false;
 
 
 protected:
@@ -77,6 +79,7 @@ public:
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
+	void MoveForwardInput(float Val);
 
 	/** Handles stafing movement, left and right */
 	void MoveRight(float Val);
