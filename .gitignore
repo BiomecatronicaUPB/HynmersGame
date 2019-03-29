@@ -12,6 +12,9 @@ Content/ParagonProps/*
 Content/SampleMap/*
 Content/InfinityBladeGrassLands/*
 Content/scifi_kitbash/*
+Content/VFX_Toolkit_V1/*
+Content/ToolShedVOL1/*
+Content/InfinityBladeEffects/*
 .vs
 *.VC.db
 *.opensdf

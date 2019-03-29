@@ -58,22 +58,8 @@ void AHynmersPlayerController::BeginPlay()
 		CreateMontage(Sequence, Montages[i]);
 	}
 
-	if (ensure(CheckAllNeededAssets())) {
-		TArray<FName> BonesKeys;
-		BonesAngles.GenerateKeyArray(BonesKeys);
+	ensure(CheckAllNeededAssets());
 
-		UAnimSequence* DataSequence = Sequences[(int32)ControlledPawn->GetActiveTile()];
-
-		for (int i = 0; i < DataSequence->GetNumberOfFrames(); i++)
-		{
-			TArray<float> AnimValues = GetAnimValues(DataSequence, DataSequence->GetTimeAtFrame(i), BonesKeys);
-			for (int j = 0; j < BonesKeys.Num(); j++) {
-				UE_LOG(LogTemp, Warning, TEXT("Animation Frame %d %s: %f"), i, *BonesKeys[j].ToString(), AnimValues[j]);
-			}
-
-		}
-
-	}
 }
 
 void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction & ThisTickFunction)
@@ -120,9 +106,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 
 		BestTime = BinarySearch(ActiveSequence, BestTimes, BonesKeys);
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Best Time: %f"), BestTime);
-
+	
 	float CurrentTime =  PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
 
 	TriggerNotifies(ActiveSequence, CurrentTime, BestTime);
@@ -169,6 +153,23 @@ void AHynmersPlayerController::PosRightThight(float rate)
 void AHynmersPlayerController::PosRightKnee(float rate)
 {
 	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
+}
+
+void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int32 NumReps)
+{
+	if (!CurrentActor)return;
+
+	if (!CheckAnimAssets()) return;
+
+	ActivePickUpActor = CurrentActor;
+	DistanceToPickUpActor = GetPawn()->GetDistanceTo(CurrentActor);
+
+	DistanceStep = DistanceToPickUpActor / (float)NumReps;
+
+	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Distance to target: %f, Distance step: %f, Distance frame %f, for frames:%d"), DistanceToPickUpActor, DistanceStep, DistanceStepFrames, Sequences[(int32)ActiveTile]->GetNumberOfFrames())
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)
@@ -251,7 +252,6 @@ TArray<int32> AHynmersPlayerController::GetBetterFrames(UAnimSequence * ActiveSe
 	TArray<float> FramesError;
 	for (int32 CurrentFrame = Frames[0]; CurrentFrame <= Frames[1]; CurrentFrame++) {
 		FramesError.Add(GetFrameErrorInTime(ActiveSequence, ActiveSequence->GetTimeAtFrame(ConvertFrame(ActiveSequence->GetNumberOfFrames(), CurrentFrame)), BonesKeys));
-		UE_LOG(LogTemp, Warning, TEXT("Frame: %d, Difference: %f"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), CurrentFrame), FramesError.Last());
 	}
 
 	int BetterIndex = 0;
@@ -263,8 +263,6 @@ TArray<int32> AHynmersPlayerController::GetBetterFrames(UAnimSequence * ActiveSe
 			BetterError = CurrentError;
 		}
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("BetterFrame %d"), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex));
 
 	return { ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex), ConvertFrame(ActiveSequence->GetNumberOfFrames(), Frames[0] + BetterIndex + 1) };
 }

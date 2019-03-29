@@ -109,6 +109,23 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	void TriggerNotifies(UAnimSequence * ActiveSequence, float CurrentTime, float BestTime);
 	/// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+	/// --------------------------------------Movement Allgorithm------------------------------------------------------------------------------------------------
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
+	AActor* ActivePickUpActor;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
+	float DistanceToPickUpActor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
+	float MaxSpeed;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
+	float DistanceStep;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
+	float DistanceStepFrames;
+	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -133,4 +150,10 @@ public:
 	void PosLeftKnee(float rate);
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
+
+	UFUNCTION(BlueprintCallable, Category = "MovementAlgorithm")
+		void SetCurrentPickUpActor(AActor* CurrentActor, int32 NumReps);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void PostBeginPlay();
 };
