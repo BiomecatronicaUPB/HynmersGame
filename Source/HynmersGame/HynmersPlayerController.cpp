@@ -65,7 +65,8 @@ void AHynmersPlayerController::BeginPlay()
 		PostBeginPlay();
 	}
 
-
+	//TODO Remove this line
+	ControlledPawn->bCanMoveWithController = true;
 }
 
 void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction & ThisTickFunction)
@@ -119,9 +120,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 	TriggerNotifies(ActiveSequence, CurrentTime, BestTime);
 	
 	SetMontagePosition(ActiveMontage, BestTime);
-
-	/// Movement algorithm
-
+	   
 	int32 CurrentFrame = ActiveSequence->GetFrameAtTime(CurrentTime);
 	int32 NewFrame = ActiveSequence->GetFrameAtTime(BestTime);
 
@@ -137,24 +136,54 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 			NumberOfRepetitions++;
 	}
 
-	if (DeltaFrame != 0 && DeltaFrame <= EvalFrameRate) {
-		DistanceToMove +=(DeltaFrame * DistanceStepFrames);
+	if (ActiveTile == EActiveTile::Nav && bIsInPC) {
+		CurrentTime = GetWorld()->GetTimeSeconds();
+
+		float DeltaTime = CurrentTime - PreviousTime;
+		
+		if (DeltaTime > TimeInterval && !bApplyTimePenalty) {
+			bApplyTimePenalty = true;
+			TimePenaltyEffect();
+		}
+
+		if (NumberOfRepetitions - PreviousRepetitions != 0) {
+			PreviousRepetitions = NumberOfRepetitions;
+			TimeBonus = TimeInterval - DeltaTime;
+			PreviousTime = CurrentTime;
+			bApplyTimePenalty = false;
+			TimeBonusEffect();
+		}
+
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
+	/// Movement algorithm only for bridge, com, machine and rooms
 
-	if (DistanceMoved <= DistanceToMove) {
-		DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();
-		PreviousLocation = ControlledPawn->GetActorLocation();
-		ControlledPawn->MoveForward(1.f);
+	if (ActiveTile == EActiveTile::Bridge || ActiveTile == EActiveTile::Machine || ActiveTile == EActiveTile::Com || ActiveTile == EActiveTile::Rooms) {
+
+		if (DeltaFrame != 0 && DeltaFrame <= EvalFrameRate) {
+			DistanceToMove += (DeltaFrame * DistanceStepFrames);
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
+
+		if (DistanceMoved <= DistanceToMove) {
+			DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();
+			PreviousLocation = ControlledPawn->GetActorLocation();
+			ControlledPawn->MoveForward(1.f);
+		}
+
+		if (TagetRepetitions != 0 && NumberOfRepetitions >= TagetRepetitions)
+		{
+			bCanPick = false;
+		}
 	}
 
 	if (TagetRepetitions != 0 && NumberOfRepetitions >= TagetRepetitions)
 	{
-		bCanPick = false;
 		TagetRepetitions = 0;
 		OnFinishRepetitions();
 		ControlledPawn->bCanMoveWithController = true;
+		bIsInPC = false;
 	}
 
 	return;
@@ -226,6 +255,19 @@ void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int3
 	NumberOfRepetitions = 0;
 
 	bCanPick = true;
+}
+
+void AHynmersPlayerController::InitNavigationTileSerie(int32 NumReps)
+{
+	TagetRepetitions = NumReps;
+	NumberOfRepetitions = 0;
+	PreviousRepetitions = 0;
+
+	PreviousTime = GetWorld()->GetTimeSeconds();
+
+	ControlledPawn->bCanMoveWithController = false;
+	
+	bIsInPC = true;
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)

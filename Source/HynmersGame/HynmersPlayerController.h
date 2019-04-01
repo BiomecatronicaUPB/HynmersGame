@@ -109,7 +109,13 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	void TriggerNotifies(UAnimSequence * ActiveSequence, float CurrentTime, float BestTime);
 	/// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	/// --------------------------------------Movement Allgorithm------------------------------------------------------------------------------------------------
+
+	/// ---------------------------------------Mechanics variables-----------------------------------------------------------------------------------------------
+	int32 TagetRepetitions;
+	int32 NumberOfRepetitions = 0;
+	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	/// --------------------------------------Movement Mechanic------------------------------------------------------------------------------------------------
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MovementAlgorithm", meta = (AllowPrivateAccess = "true"))
 	AActor* ActivePickUpActor;
 
@@ -126,15 +132,28 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	float DistanceStepFrames;
 
 	FVector PreviousLocation;
-
-	int32 TagetRepetitions;
-	int32 NumberOfRepetitions = 0;
-
+	
 	float DistanceToMove;
 
 	float DistanceMoved = 0.f;
 
 	bool bCanPick = true;
+	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	///-----------------------------------Dnace Mechanic----------------------------------------------------------------------------------------------------------
+	float TimeInterval = 5.f;
+
+	float CurrentTime = 0.f;
+	float PreviousTime = 0.f;
+
+	int32 PreviousRepetitions = 0;
+
+	bool bApplyTimePenalty = false;
+
+	float TimePenalty;
+	float TimeBonus;
+
+	bool bIsInPC = false;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
@@ -162,12 +181,24 @@ public:
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
 
-	UFUNCTION(BlueprintCallable, Category = "MovementAlgorithm")
+	UFUNCTION(BlueprintCallable, Category = "Mechanics")
 		void SetCurrentPickUpActor(AActor* CurrentActor, int32 NumReps);
+
+	UFUNCTION(BlueprintCallable, Category = "Mechanics")
+		void InitNavigationTileSerie(int32 NumReps);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void PostBeginPlay();
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void OnFinishRepetitions();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void PlayCountDown();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void TimePenaltyEffect();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void TimeBonusEffect();
 };
