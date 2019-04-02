@@ -164,7 +164,7 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 			DistanceToMove += (DeltaFrame * DistanceStepFrames);
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
+		//UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
 
 		if (DistanceMoved <= DistanceToMove) {
 			DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();

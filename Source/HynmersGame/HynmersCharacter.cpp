@@ -77,6 +77,24 @@ AHynmersCharacter::AHynmersCharacter(const FObjectInitializer& ObjectInitializer
 
 }
 
+void AHynmersCharacter::Landed(const FHitResult & Hit)
+{
+	Super::Landed(Hit);
+
+	if (ActiveTile == EActiveTile::Lab) {
+		TArray<AActor*> OvelappingActors;
+
+		GetOverlappingActors(OvelappingActors);
+		
+		for (AActor* OverlappingActor : OvelappingActors) {
+			if (OverlappingActor->IsA(JumpPlatformClass)) {
+				PostLanded(OverlappingActor);
+				return;
+			}
+		}
+	}
+}
+
 void AHynmersCharacter::BeginPlay()
 {
 	// Call the base class  

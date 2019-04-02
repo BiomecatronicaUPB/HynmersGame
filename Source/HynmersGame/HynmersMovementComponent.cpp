@@ -593,7 +593,7 @@ void UHynmersMovementComponent::PerformMovement(float DeltaSeconds)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("NetDriver && NetDriver->IsServer()"))
 
-				FNetworkObjectInfo* NetActor = NetDriver->GetNetworkObjectInfo(CharacterOwner);
+					FNetworkObjectInfo* NetActor = NetDriver->FindNetworkObjectInfo(CharacterOwner);
 
 				if (NetActor && MyWorld->GetTimeSeconds() <= NetActor->NextUpdateTime && NetDriver->IsNetworkActorUpdateFrequencyThrottled(*NetActor))
 				{
@@ -2104,7 +2104,6 @@ FVector UHynmersMovementComponent::GetFallingLateralAcceleration(float DeltaTime
 
 bool UHynmersMovementComponent::DoJump(bool bReplayingMoves)
 {
-	UE_LOG(LogTemp, Warning, TEXT("JUMP_TIME: %d"), GetWorld()->GetTimeSeconds())
 	if (CharacterOwner && CharacterOwner->CanJump())
 	{
 		// Don't jump if we can't move up/down.
@@ -2122,7 +2121,6 @@ bool UHynmersMovementComponent::DoJump(bool bReplayingMoves)
 
 float UHynmersMovementComponent::BoostAirControl(float DeltaTime, float TickAirControl, const FVector & FallAcceleration)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Im in BoostAirControl"))
 	if (AirControlBoostMultiplier > 0.f && (Velocity-(Velocity | UpVector)*UpVector).SizeSquared() < FMath::Square(AirControlBoostVelocityThreshold))
 	{
 		TickAirControl = FMath::Min(1.f, AirControlBoostMultiplier * TickAirControl);
@@ -2133,7 +2131,6 @@ float UHynmersMovementComponent::BoostAirControl(float DeltaTime, float TickAirC
 
 void UHynmersMovementComponent::ProcessLanded(const FHitResult & Hit, float remainingTime, int32 Iterations)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Im Landing"))
 	if (CharacterOwner && CharacterOwner->ShouldNotifyLanded(Hit))
 	{
 		CharacterOwner->Landed(Hit);

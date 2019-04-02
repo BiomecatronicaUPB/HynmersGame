@@ -40,8 +40,15 @@ class AHynmersCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
 	EActiveTile ActiveTile;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Mechanics, meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<AActor> JumpPlatformClass;
+
+
+
 public:
 	AHynmersCharacter(const FObjectInitializer& ObjectInitializer);
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Transform")
 	FTransform InitialTransform;
@@ -97,6 +104,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	int32 GetCurrentTile() const;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PostLanded(AActor* JumpPlatform);
 
 protected:
 
