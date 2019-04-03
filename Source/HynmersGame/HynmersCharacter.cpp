@@ -207,6 +207,9 @@ void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 	SetActorLocation(TargetLocation + InitialTransform.GetLocation());
 
 	RotationState = alpha;
+	if (alpha >= 1.f) {
+		RotationState = 0.f;
+	}
 }
 
 FTransform AHynmersCharacter::GetBoneTransform(FName BoneName)
