@@ -33,7 +33,7 @@ protected:
 	bool SpawnCurrentSession();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
-	void InitBlueprints();
+	bool InitBlueprints();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
 	void PostBeginPlay();

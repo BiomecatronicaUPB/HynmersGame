@@ -203,8 +203,12 @@ void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 
 	TargetLocation = (TargetLocation - InitialTransform.GetLocation())*alpha;
 
+	SetActorEnableCollision(false);
+
 	AddActorWorldRotation(TargetRotation.Rotator()*(alpha - RotationState));
 	SetActorLocation(TargetLocation + InitialTransform.GetLocation());
+	SetActorEnableCollision(true);
+
 
 	RotationState = alpha;
 	if (alpha >= 1.f) {

@@ -28,7 +28,7 @@ void AHynmersGameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitBlueprints();
+	bool Init = InitBlueprints();
 
 	GameInstance = Cast<UHGameInstance>(GetGameInstance());
 	if (!GameInstance)return;
@@ -42,10 +42,9 @@ void AHynmersGameGameMode::BeginPlay()
 		for (FMapSavedParameters Session : MapSaved->SavedMap) {
 			SpawnSessionMap(Session);
 		}
-		PostBeginPlay();
+		PostBeginPlay(); 
+		SpawnCurrentSession();
 	}
-
-	SpawnCurrentSession();
 }
 
 bool AHynmersGameGameMode::SpawnCurrentSession()
@@ -88,6 +87,8 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 		GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
 	}
 
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *GateTransform.ToString());
+
 	CurrentSession.BridgeInitialTransform = GateTransform;
 
 	for (int i = 0; i < MapParameters.TilesToBeSpawned.Num(); i++) {
@@ -108,7 +109,6 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			if (OverlappingActors.Num() == 0) {
 				CurrentSession.TilesToBeSpawned.Add(MapParameters.TilesToBeSpawned[i]);
 				CurrentSession.SplinesEndLocations.Add(SplineEndLocation);
-				GateTransform = SpawnedTile->GetAttachLocation();
 				break;
 			}
 
