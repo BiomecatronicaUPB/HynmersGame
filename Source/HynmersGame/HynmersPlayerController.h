@@ -140,7 +140,7 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	bool bCanPick = true;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	///-----------------------------------Dnace Mechanic----------------------------------------------------------------------------------------------------------
+	///-----------------------------------Dance Mechanic----------------------------------------------------------------------------------------------------------
 	float TimeInterval = 5.f;
 
 	float CurrentTime = 0.f;
@@ -187,6 +187,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mechanics")
 		void InitNavigationTileSerie(int32 NumReps);
 
+	UFUNCTION(BlueprintCallable, Category = "Mechanics")
+		void InitLabTileSerie(int32 NumReps);
+
 	UFUNCTION(BlueprintImplementableEvent)
 		void PostBeginPlay();
 
@@ -201,4 +204,5 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void TimeBonusEffect();
+
 };

@@ -136,6 +136,8 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 			NumberOfRepetitions++;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
+
 	if (ActiveTile == EActiveTile::Nav && bIsInPC) {
 		CurrentTime = GetWorld()->GetTimeSeconds();
 
@@ -163,8 +165,6 @@ void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, F
 		if (DeltaFrame != 0 && DeltaFrame <= EvalFrameRate) {
 			DistanceToMove += (DeltaFrame * DistanceStepFrames);
 		}
-
-		//UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
 
 		if (DistanceMoved <= DistanceToMove) {
 			DistanceMoved += (ControlledPawn->GetActorLocation() - PreviousLocation).Size2D();
@@ -268,6 +268,14 @@ void AHynmersPlayerController::InitNavigationTileSerie(int32 NumReps)
 	ControlledPawn->bCanMoveWithController = false;
 	
 	bIsInPC = true;
+}
+
+void AHynmersPlayerController::InitLabTileSerie(int32 NumReps)
+{
+	TagetRepetitions = NumReps;
+	NumberOfRepetitions = 0;
+
+	ControlledPawn->bCanMoveWithController = false;
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)

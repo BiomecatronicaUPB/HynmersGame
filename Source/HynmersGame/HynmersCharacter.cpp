@@ -147,7 +147,7 @@ void AHynmersCharacter::OnResetVR()
 
 void AHynmersCharacter::MoveForward(float Value)
 {
-	if (Value != 0.0f)
+	if (Value != 0.0f && bCanMoveWithController)
 	{
 		// add movement in that direction
 		AddMovementInput((bReadyToSwim)?GetActorUpVector():GetRootComponent()->GetForwardVector(), Value);
@@ -186,13 +186,14 @@ void AHynmersCharacter::LookUpRate(float Rate)
 
 void AHynmersCharacter::HGJump()
 {
-	if(!GetCharacterMovement()->IsSwimming())
+	if(!GetCharacterMovement()->IsSwimming() && bCanMoveWithController)
 		bStartJump = true;
 }
 
 void AHynmersCharacter::HGStopJumping()
 {
-	bStartJump = false;
+	if(bCanMoveWithController)
+		bStartJump = false;
 }
 
 void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
