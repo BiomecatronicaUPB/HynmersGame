@@ -25,6 +25,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
 	bool SpawnSessionMap(FMapSavedParameters MapParameters);
 
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
+		void InitMechanics();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -37,7 +41,7 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "BeginPlay")
 	void PostBeginPlay();
-
+	   
 	UFUNCTION(BlueprintImplementableEvent, Category = "SavedGame")
 	UHynmersSaveGame* LoadSavedGameData();
 
@@ -71,8 +75,17 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
 	TArray<FSessionInfo> GameSessionInfo;
 
+	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
+		TArray<class AHynmersBaseTile*> TilesSpawned;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
+		TArray<AHynmersConnector*> ConnectorsSPawned;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MapGeneration")
+		bool bActiveBridge = false;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")
-	TMap<EActiveTile, TSubclassOf<class AHynmersBaseTile>> Tiles;
+	TMap<EActiveTile, TSubclassOf<AHynmersBaseTile>> Tiles;
 
 	// Angle in degrees
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MapGeneration")

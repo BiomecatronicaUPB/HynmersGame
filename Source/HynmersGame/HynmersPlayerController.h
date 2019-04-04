@@ -157,8 +157,6 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 protected:
-	virtual void BeginPlay() override;
-
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 
 	virtual void SetupInputComponent() override;
@@ -181,8 +179,10 @@ public:
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
 
+	void BeginPlayFromGM();
+
 	UFUNCTION(BlueprintCallable, Category = "Mechanics")
-		void SetCurrentPickUpActor(AActor* CurrentActor, int32 NumReps);
+		void SetCurrentPickUpActor(float DistanceToActor, int32 NumReps);
 
 	UFUNCTION(BlueprintCallable, Category = "Mechanics")
 		void InitNavigationTileSerie(int32 NumReps);
@@ -190,9 +190,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Mechanics")
 		void InitLabTileSerie(int32 NumReps);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void PostBeginPlay();
-
+	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void OnFinishRepetitions();
 

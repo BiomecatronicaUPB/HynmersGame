@@ -13,6 +13,7 @@
 #include "Kismet/KismetArrayLibrary.h"
 
 #include "HGameInstance.h"
+#include "HynmersPlayerController.h"
 
 AHynmersGameGameMode::AHynmersGameGameMode()
 {
@@ -44,6 +45,11 @@ void AHynmersGameGameMode::BeginPlay()
 		}
 		PostBeginPlay(); 
 		SpawnCurrentSession();
+		AHynmersPlayerController* PlayerController = Cast<AHynmersPlayerController>(GetWorld()->GetFirstPlayerController());
+		if (PlayerController) {
+			PlayerController->BeginPlayFromGM();
+			InitMechanics();
+		}
 	}
 }
 
@@ -55,8 +61,18 @@ bool AHynmersGameGameMode::SpawnCurrentSession()
 
 	for (FSessionInfo CurrentExercise : GameSessionInfo)
 	{
-		if(Tiles.Contains((EActiveTile)CurrentExercise.ExerciseIndex) && CurrentExercise.ExerciseIndex != (int32)EActiveTile::Bridge)
-			OutputTiles.Add(Tiles[(EActiveTile)CurrentExercise.ExerciseIndex]);
+		if (Tiles.Contains((EActiveTile)CurrentExercise.ExerciseIndex)) {
+			
+			if (CurrentExercise.ExerciseIndex != (int32)EActiveTile::Bridge) {
+				OutputTiles.Add(Tiles[(EActiveTile)CurrentExercise.ExerciseIndex]);
+			}
+			else {
+				bActiveBridge = true;
+			}
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("GAME MODE: Tiles classes are missing"));
+		}
 	}
 
 	ShuffleArray(OutputTiles);
@@ -75,6 +91,7 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 	FTransform GateTransform;
 	int32 MachineRoomIndex;
 	AHynmersBaseTile* MachineRoomTile = (AHynmersBaseTile*)CheckMachineRoom(MapParameters.TilesToBeSpawned, MachineRoomIndex);
+	bool bCurretnSessionSpawning = UKismetMathLibrary::NearlyEqual_TransformTransform(MapParameters.BridgeInitialTransform, FTransform::Identity);
 
 	if (MachineRoomTile) {
 		GateTransform = MachineRoomTile->GetAttachLocation();
@@ -104,11 +121,21 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			AHynmersBaseTile* SpawnedTile = (AHynmersBaseTile*)SpawnTile(MapParameters.TilesToBeSpawned[i], TileTransform);
 
 			TArray<AActor*> OverlappingActors;
-			SpawnedTile->Box->GetOverlappingActors(OverlappingActors);
+			SpawnedTile->GetBoxComponent()->GetOverlappingActors(OverlappingActors);
 
 			if (OverlappingActors.Num() == 0) {
+
+				if (bCurretnSessionSpawning) {
+					TilesSpawned.Add(SpawnedTile);
+					ConnectorsSPawned.Add(Connector);
+
+					Connector->SetActorHiddenInGame(true);
+					SpawnedTile->SetActorHiddenInGame(true);
+				}
+
 				CurrentSession.TilesToBeSpawned.Add(MapParameters.TilesToBeSpawned[i]);
 				CurrentSession.SplinesEndLocations.Add(SplineEndLocation);
+				GateTransform = SpawnedTile->GetAttachLocation();
 				break;
 			}
 

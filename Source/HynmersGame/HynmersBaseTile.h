@@ -17,14 +17,14 @@ class HYNMERSGAME_API AHynmersBaseTile : public AActor
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	class UArrowComponent* Arrow;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* Box;
 
 public:	
 	// Sets default values for this actor's properties
 	AHynmersBaseTile();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform")
-	class UBoxComponent* Box;
 
 
 protected:
@@ -41,6 +41,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attachment")
 	virtual FTransform GetAttachLocation();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Transform")
+		int32 Series;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Transform")
+		int32 TotalSeries;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Transform")
+		int32 Repetitions;
+
+	FORCEINLINE UBoxComponent* GetBoxComponent() { return Box; }
 	
 };

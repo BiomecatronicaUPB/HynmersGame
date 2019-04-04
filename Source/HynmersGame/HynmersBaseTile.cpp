@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
 
+#include "HynmersCharacter.h"
 
 // Sets default values
 AHynmersBaseTile::AHynmersBaseTile():Super()
@@ -24,6 +25,18 @@ AHynmersBaseTile::AHynmersBaseTile():Super()
 void AHynmersBaseTile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TArray<AActor*> OverlappingActors;
+	Box->GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		AHynmersCharacter* Pawn = Cast<AHynmersCharacter>(Actor);
+		if (Pawn) {
+			Pawn->CurrentTile = this;
+			return;
+		}
+	}
 	
 }
 

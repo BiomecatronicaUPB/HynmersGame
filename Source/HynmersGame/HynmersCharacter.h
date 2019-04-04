@@ -59,8 +59,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
 	bool bInteractWith = false;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Mechanics)
 	bool bCanMoveWithController = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mechanics)
+	class AHynmersBaseTile* CurrentTile;
 
 
 protected:

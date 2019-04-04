@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 #include "HynmersMovementComponent.h"
+#include "HynmersGameGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
 
@@ -20,9 +21,8 @@ AHynmersPlayerController::AHynmersPlayerController()
 	KneeWeight = 1.f - ThighWeight;
 }
 
-void AHynmersPlayerController::BeginPlay()
+void AHynmersPlayerController::BeginPlayFromGM()
 {
-	Super::BeginPlay();
 
 	ControlledPawn = Cast<AHynmersCharacter>(GetPawn());
 	if (!ensure(ControlledPawn))return;
@@ -30,7 +30,7 @@ void AHynmersPlayerController::BeginPlay()
 	PawnAnimationInstance = ControlledPawn->GetMesh()->GetAnimInstance();
 
 	if (!CheckAnimAssets()) {
-		UE_LOG(LogTemp, Error, TEXT("Some sequences is missing"));
+		UE_LOG(LogTemp, Error, TEXT("Some sequences are missing"));
 		return;
 	}
 
@@ -60,18 +60,12 @@ void AHynmersPlayerController::BeginPlay()
 		CreateMontage(Sequence, Montages[i]);
 	}
 
-	if (ensure(CheckAllNeededAssets()))
-	{
-		PostBeginPlay();
-	}
-
-	//TODO Remove this line
-	ControlledPawn->bCanMoveWithController = true;
+	ensure(CheckAllNeededAssets());
 }
 
-void AHynmersPlayerController::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction & ThisTickFunction)
+void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType, FActorTickFunction & ThisTickFunction)
 {
-	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
+	Super::TickActor(DeltaSeconds, TickType, ThisTickFunction);
 
 	if (!CheckAllNeededAssets())return;
 	
@@ -229,19 +223,21 @@ void AHynmersPlayerController::PosRightKnee(float rate)
 	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
 }
 
-void AHynmersPlayerController::SetCurrentPickUpActor(AActor * CurrentActor, int32 NumReps)
+void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int32 NumReps)
 {
-	if (!CurrentActor)return;
 
 	if (!CheckAnimAssets()) return;
 
-	ActivePickUpActor = CurrentActor;
+	if (Sequences.Num() <= 0) {
+		UE_LOG(LogTemp, Error, TEXT("Sequence array is empty"));
+		return;
+	}
 
-	DistanceToPickUpActor = ControlledPawn->GetDistanceTo(CurrentActor);
+	DistanceToPickUpActor = DistanceToActor;
 
 	DistanceStep = DistanceToPickUpActor / ((float)NumReps+1);
 	TagetRepetitions = NumReps;
-
+	
 	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
 
 	DistanceToMove = DistanceStepFrames;

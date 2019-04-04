@@ -147,7 +147,7 @@ void AHynmersCharacter::OnResetVR()
 
 void AHynmersCharacter::MoveForward(float Value)
 {
-	if (Value != 0.0f && bCanMoveWithController)
+	if (Value != 0.0f )
 	{
 		// add movement in that direction
 		AddMovementInput((bReadyToSwim)?GetActorUpVector():GetRootComponent()->GetForwardVector(), Value);
@@ -164,7 +164,7 @@ void AHynmersCharacter::MoveForwardInput(float Val)
 
 void AHynmersCharacter::MoveRight(float Value)
 {
-	if (Value != 0.0f)
+	if (Value != 0.0f && bCanMoveWithController)
 	{
 		// add movement in that direction
 		AddMovementInput(GetRootComponent()->GetRightVector(), Value);
@@ -202,14 +202,10 @@ void AHynmersCharacter::UpdateTransform(FTransform Target, float alpha)
 	FQuat TargetRotation = Target.GetRotation() * InitialTransform.GetRotation().Inverse();
 
 	TargetLocation = (TargetLocation - InitialTransform.GetLocation())*alpha;
-
-	SetActorEnableCollision(false);
-
+	
 	AddActorWorldRotation(TargetRotation.Rotator()*(alpha - RotationState));
 	SetActorLocation(TargetLocation + InitialTransform.GetLocation());
-	SetActorEnableCollision(true);
-
-
+	
 	RotationState = alpha;
 	if (alpha >= 1.f) {
 		RotationState = 0.f;
