@@ -132,6 +132,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE EActiveTile GetActiveTile() { return ActiveTile; }
-
+	FORCEINLINE void SetActiveTile(EActiveTile Tile) { ActiveTile = Tile; }
 };
 

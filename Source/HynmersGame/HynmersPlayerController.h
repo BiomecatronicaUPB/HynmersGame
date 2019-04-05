@@ -111,8 +111,13 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 
 
 	/// ---------------------------------------Mechanics variables-----------------------------------------------------------------------------------------------
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	int32 TagetRepetitions;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	int32 NumberOfRepetitions = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
+	float PunctuationTune = 400.f;
+	float BasePunctuation = 0.f;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	/// --------------------------------------Movement Mechanic------------------------------------------------------------------------------------------------
@@ -155,6 +160,9 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 
 	bool bIsInPC = false;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
+	float Puntuaction = 0.f;
 
 protected:
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;

@@ -15,11 +15,15 @@ struct FSessionInfo
 {
 	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(BlueprintReadWrite)
 	int32 ExerciseIndex;
+	UPROPERTY(BlueprintReadWrite)
 	int32 Series;
+	UPROPERTY(BlueprintReadWrite)
 	int32 Repetitions;
-
+	UPROPERTY(BlueprintReadWrite)
 	TArray<float> UpperLimits;
+	UPROPERTY(BlueprintReadWrite)
 	TArray<float> LowerLimits;
 };
 

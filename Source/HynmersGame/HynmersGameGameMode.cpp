@@ -68,6 +68,7 @@ bool AHynmersGameGameMode::SpawnCurrentSession()
 			}
 			else {
 				bActiveBridge = true;
+				InitBridge(GameSessionInfo);
 			}
 		}
 		else {
@@ -94,6 +95,8 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 	bool bCurretnSessionSpawning = UKismetMathLibrary::NearlyEqual_TransformTransform(MapParameters.BridgeInitialTransform, FTransform::Identity);
 
 	if (MachineRoomTile) {
+		MachineRoomTile->InitParameters(GameSessionInfo);
+
 		GateTransform = MachineRoomTile->GetAttachLocation();
 		// Add to the save game the machine room
 		CurrentSession.TilesToBeSpawned.Add(MapParameters.TilesToBeSpawned[MachineRoomIndex]);
@@ -103,10 +106,11 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 	else {
 		GateTransform = UpdateBridgeGatesTransform(MapParameters.BridgeInitialTransform);
 	}
+	
+	CurrentSession.BridgeInitialTransform = GateTransform;
+
 
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *GateTransform.ToString());
-
-	CurrentSession.BridgeInitialTransform = GateTransform;
 
 	for (int i = 0; i < MapParameters.TilesToBeSpawned.Num(); i++) {
 
@@ -126,6 +130,8 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			if (OverlappingActors.Num() == 0) {
 
 				if (bCurretnSessionSpawning) {
+					SpawnedTile->InitParameters(GameSessionInfo);
+
 					TilesSpawned.Add(SpawnedTile);
 					ConnectorsSPawned.Add(Connector);
 

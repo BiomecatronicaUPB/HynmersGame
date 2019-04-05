@@ -19,24 +19,13 @@ AHynmersBaseTile::AHynmersBaseTile():Super()
 	Arrow = CreateDefaultSubobject<UArrowComponent>("Arrow");
 	Arrow->SetupAttachment(RootComponent);
 
+	Box->OnComponentBeginOverlap.AddDynamic(this, &AHynmersBaseTile::OnBoxOverlapping);
 }
 
 // Called when the game starts or when spawned
 void AHynmersBaseTile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	TArray<AActor*> OverlappingActors;
-	Box->GetOverlappingActors(OverlappingActors);
-
-	for (AActor* Actor : OverlappingActors)
-	{
-		AHynmersCharacter* Pawn = Cast<AHynmersCharacter>(Actor);
-		if (Pawn) {
-			Pawn->CurrentTile = this;
-			return;
-		}
-	}
 	
 }
 
@@ -63,4 +52,14 @@ FTransform AHynmersBaseTile::GetAttachLocation()
 		return Arrow->GetComponentTransform();
 	}
 	return FTransform::Identity;
+}
+
+void AHynmersBaseTile::OnBoxOverlapping(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	AHynmersCharacter* Pawn = Cast<AHynmersCharacter>(OtherActor);
+
+	if (Pawn) {
+		Pawn->CurrentTile = this;
+		Pawn->SetActiveTile(TileType);
+	}
 }

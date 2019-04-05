@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "HGameInstance.h"
+#include "HynmersGame.h"
 #include "HynmersBaseTile.generated.h"
 
 UCLASS()
@@ -21,6 +23,8 @@ class HYNMERSGAME_API AHynmersBaseTile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* Box;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	EActiveTile TileType;
 public:	
 	// Sets default values for this actor's properties
 	AHynmersBaseTile();
@@ -41,14 +45,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attachment")
 	virtual FTransform GetAttachLocation();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Transform")
-		int32 Series;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Transform")
-		int32 TotalSeries;
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void InitParameters(const TArray<FSessionInfo>& GameSessionInfo);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Transform")
-		int32 Repetitions;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics")
+	int32 Series;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics")
+	int32 TotalSeries;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics")
+	int32 Repetitions;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics")
+	TArray<float> UpperLimits;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics")
+	TArray<float> LowerLimits;
+
+	UFUNCTION()
+	void OnBoxOverlapping(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	FORCEINLINE UBoxComponent* GetBoxComponent() { return Box; }
 	

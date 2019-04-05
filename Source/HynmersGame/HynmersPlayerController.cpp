@@ -12,6 +12,7 @@
 
 #include "HynmersMovementComponent.h"
 #include "HynmersGameGameMode.h"
+#include "HynmersBaseTile.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
 
@@ -130,31 +131,52 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 			NumberOfRepetitions++;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Reps %d"), NumberOfRepetitions);
+
+	if (DeltaFrame > 0 && DeltaFrame <= EvalFrameRate)
+	{
+		Puntuaction += BasePunctuation;
+		
+		TArray<FName> BonesAnglesKeys;
+		BonesAngles.GenerateKeyArray(BonesAnglesKeys);
+
+		for (int Index = 0; Index < BonesAngles.Num(); Index++) {
+			if (ControlledPawn->CurrentTile) {
+				float Bonus = (BonesAngles[BonesAnglesKeys[Index]] > 0) ?
+					ControlledPawn->CurrentTile->UpperLimits[Index] - BonesAngles[BonesAnglesKeys[Index]] :
+					ControlledPawn->CurrentTile->LowerLimits[Index] - BonesAngles[BonesAnglesKeys[Index]];
+				Puntuaction += Bonus * 10;
+			}
+		}
+	}
 
 	if (ActiveTile == EActiveTile::Nav && bIsInPC) {
 		CurrentTime = GetWorld()->GetTimeSeconds();
+		TimeBonus = 0.f;
 
 		float DeltaTime = CurrentTime - PreviousTime;
 		
 		if (DeltaTime > TimeInterval && !bApplyTimePenalty) {
 			bApplyTimePenalty = true;
+			TimeBonus = PunctuationTune / (TimeInterval - DeltaTime);
 			TimePenaltyEffect();
 		}
 
 		if (NumberOfRepetitions - PreviousRepetitions != 0) {
 			PreviousRepetitions = NumberOfRepetitions;
-			TimeBonus = TimeInterval - DeltaTime;
+			TimeBonus = PunctuationTune / (TimeInterval - DeltaTime);
 			PreviousTime = CurrentTime;
 			bApplyTimePenalty = false;
 			TimeBonusEffect();
 		}
+
+		Puntuaction += TimeBonus;
 
 	}
 
 	/// Movement algorithm only for bridge, com, machine and rooms
 
 	if (ActiveTile == EActiveTile::Bridge || ActiveTile == EActiveTile::Machine || ActiveTile == EActiveTile::Com || ActiveTile == EActiveTile::Rooms) {
+
 
 		if (DeltaFrame != 0 && DeltaFrame <= EvalFrameRate) {
 			DistanceToMove += (DeltaFrame * DistanceStepFrames);
@@ -346,7 +368,9 @@ TArray<int32> AHynmersPlayerController::GetFrameRange(UAnimMontage * ActiveMonta
 float AHynmersPlayerController::GetFrameErrorInTime(UAnimSequence* ActiveSequence, const float& FrameTime, TArray<FName> &BonesKeys)
 {
 	TArray<float> AnimValues = GetAnimValues(ActiveSequence, FrameTime, BonesKeys);
-	return GetError(BonesAngles, AnimValues);
+	float Error = GetError(BonesAngles, AnimValues);
+	BasePunctuation = PunctuationTune / Error;
+	return Error;
 }
 
 TArray<int32> AHynmersPlayerController::GetBetterFrames(UAnimSequence * ActiveSequence, TArray<FName>& BonesKeys, const TArray<int32> &Frames)

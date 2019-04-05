@@ -57,6 +57,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
 	AActor* CheckMachineRoom(const TArray<TSubclassOf<AActor>>& TilesToBeSpawned, int32& TileIndex);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "MapGeneration")
+	void InitBridge(const TArray<FSessionInfo>& GameSessionInfo);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Utility")
 	void ShuffleArray(TArray<TSubclassOf<AActor>>& Array);
 
