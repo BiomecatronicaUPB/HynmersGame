@@ -43,7 +43,7 @@ void AHynmersPlayerController::BeginPlayFromGM()
 	Sequences.Add(BikeSequence);				//	4
 	Sequences.Add(LegsMoveSequence);			//	5
 
-	Montages.SetNum(Sequences.Num());
+	Montages.Init(nullptr,Sequences.Num());
 
 	BonesAngles.Add("thigh_L", 0.f);
 	BonesAngles.Add("shin_L", 0.f);
@@ -73,8 +73,13 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	ActiveTile = ControlledPawn->GetActiveTile();
 
 	UAnimSequence* ActiveSequence = Sequences[(int32)ActiveTile];
-	UAnimMontage* ActiveMontage = Montages[(int32)ActiveTile];
 
+	if (!Montages[(int32)ActiveTile] || !Montages[(int32)ActiveTile]->IsValidLowLevel()) {
+		UE_LOG(LogTemp, Warning, TEXT("Montage corrupted"));
+		CreateMontage(ActiveSequence, Montages[(int32)ActiveTile]);
+	}
+
+	UAnimMontage* ActiveMontage = Montages[(int32)ActiveTile];
 
 	int32 ActiveFrameRange = AnimationSpecificFrameRange.Contains(ActiveTile) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
 
@@ -122,6 +127,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	int32 DeltaFrame = NewFrame - CurrentFrame;
 	int32 DeltaFrameConverted = ActiveSequence->GetNumberOfFrames() + NewFrame - CurrentFrame;
 	int32 EvalFrameRate = (AnimationSpecificFrameRange.Contains(ActiveTile)) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
+	TimeBonus = 0.f;
 
 	if (DeltaFrame < 0)
 	{
@@ -151,7 +157,6 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 
 	if (ActiveTile == EActiveTile::Nav && bIsInPC) {
 		CurrentTime = GetWorld()->GetTimeSeconds();
-		TimeBonus = 0.f;
 
 		float DeltaTime = CurrentTime - PreviousTime;
 		
@@ -370,6 +375,7 @@ float AHynmersPlayerController::GetFrameErrorInTime(UAnimSequence* ActiveSequenc
 	TArray<float> AnimValues = GetAnimValues(ActiveSequence, FrameTime, BonesKeys);
 	float Error = GetError(BonesAngles, AnimValues);
 	BasePunctuation = PunctuationTune / Error;
+	UE_LOG(LogTemp, Warning, TEXT("Base points :%f"), BasePunctuation);
 	return Error;
 }
 

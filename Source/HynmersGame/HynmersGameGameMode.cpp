@@ -149,7 +149,7 @@ bool AHynmersGameGameMode::SpawnSessionMap(FMapSavedParameters MapParameters)
 			Connector->Destroy();
 		}
 
-		if (attemp == MaxGenerationTries - 1) {
+		if (attemp == MaxGenerationTries ) {
 			UE_LOG(LogTemp, Error, TEXT("Map generation failed"));
 			return false;
 		}

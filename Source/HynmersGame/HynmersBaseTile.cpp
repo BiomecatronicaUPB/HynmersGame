@@ -32,11 +32,15 @@ void AHynmersBaseTile::BeginPlay()
 void AHynmersBaseTile::MakeDefaultTransform(FVector Location, FRotator Rotation, USceneComponent* Component)
 {
 	FTransform CurrentTransform = Component->GetRelativeTransform();
+
+	FVector Scale = Component->GetComponentScale();
+
 	Component->ResetRelativeTransform();
 	Component->AddRelativeRotation(Rotation);
 	Component->AddRelativeLocation(Location);
 	Component->AddLocalOffset(CurrentTransform.GetLocation());
 	Component->AddLocalRotation(CurrentTransform.GetRotation().Rotator());
+	Component->SetRelativeScale3D(Scale);
 }
 
 // Called every frame

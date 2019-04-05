@@ -53,7 +53,7 @@ UHynmersMovementComponent::UHynmersMovementComponent()
 
 	MaxFlySpeed = 600.0f;
 	MaxWalkSpeed = 150.0f;
-	MaxSwimSpeed = 300.0f;
+	MaxSwimSpeed = 80.f;
 	MaxCustomMovementSpeed = MaxWalkSpeed;
 
 	MaxSimulationTimeStep = 0.05f;
@@ -89,7 +89,7 @@ UHynmersMovementComponent::UHynmersMovementComponent()
 	BrakingDecelerationWalking = MaxAcceleration;
 	BrakingDecelerationFalling = 0.f;
 	BrakingDecelerationFlying = 0.f;
-	BrakingDecelerationSwimming = 0.f;
+	BrakingDecelerationSwimming = 10000.f;
 	LedgeCheckThreshold = 4.0f;
 	JumpOutOfWaterPitch = 11.25f;
 	UpperImpactNormalScale_DEPRECATED = 0.5f;
