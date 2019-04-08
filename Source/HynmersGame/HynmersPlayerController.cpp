@@ -149,8 +149,8 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 			if (ControlledPawn->CurrentTile) {
 				float Bonus = (BonesAngles[BonesAnglesKeys[Index]] > 0) ?
 					ControlledPawn->CurrentTile->UpperLimits[Index] - BonesAngles[BonesAnglesKeys[Index]] :
-					ControlledPawn->CurrentTile->LowerLimits[Index] - BonesAngles[BonesAnglesKeys[Index]];
-				Puntuaction += Bonus * 10;
+					BonesAngles[BonesAnglesKeys[Index]] - ControlledPawn->CurrentTile->LowerLimits[Index];
+				Puntuaction += (Bonus * 5);
 			}
 		}
 	}
