@@ -5,6 +5,7 @@
 #include "Components/ArrowComponent.h"
 
 #include "HynmersCharacter.h"
+#include "HynmersMovementComponent.h"
 
 // Sets default values
 AHynmersBaseTile::AHynmersBaseTile():Super()
@@ -20,6 +21,7 @@ AHynmersBaseTile::AHynmersBaseTile():Super()
 	Arrow->SetupAttachment(RootComponent);
 
 	Box->OnComponentBeginOverlap.AddDynamic(this, &AHynmersBaseTile::OnBoxOverlapping);
+	Box->OnComponentEndOverlap.AddDynamic(this, &AHynmersBaseTile::OnBoxEndOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -65,5 +67,15 @@ void AHynmersBaseTile::OnBoxOverlapping(UPrimitiveComponent * OverlappedComponen
 	if (Pawn) {
 		Pawn->CurrentTile = this;
 		Pawn->SetActiveTile(TileType);
+	}
+}
+
+void AHynmersBaseTile::OnBoxEndOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
+{
+	AHynmersCharacter* Pawn = Cast<AHynmersCharacter>(OtherActor);
+	if (Pawn) {
+		UHynmersMovementComponent* PawnMovement = Cast<UHynmersMovementComponent>(Pawn->GetCharacterMovement());
+		if (PawnMovement)
+			PawnMovement->bSpecialJumpEnabled = false;
 	}
 }

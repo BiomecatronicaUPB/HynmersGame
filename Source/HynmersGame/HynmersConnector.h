@@ -25,6 +25,9 @@ class HYNMERSGAME_API AHynmersConnector : public AActor
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Curve", meta = (AllowPrivateAccess = "true"))
 	class UCurveVector* SplineCurve = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+	float UpOffset = 50.f;
 	
 	FVector EndLocation;
 

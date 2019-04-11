@@ -21,7 +21,10 @@ FTransform AHynmersConnector::GetAttachLocation()
 	if(!VerifySpline())
 		return FTransform::Identity;
 
-	return Spline->GetTransformAtSplinePoint(Spline->GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::World);
+	FTransform BaseTransform = Spline->GetTransformAtSplinePoint(Spline->GetNumberOfSplinePoints(), ESplineCoordinateSpace::World);
+	FVector FinalPointUpVector = Spline->GetUpVectorAtSplinePoint(Spline->GetNumberOfSplinePoints(), ESplineCoordinateSpace::World);
+	BaseTransform.AddToTranslation(FinalPointUpVector * UpOffset);
+	return BaseTransform;
 }
 
 bool AHynmersConnector::VerifySpline()

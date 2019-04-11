@@ -13,6 +13,7 @@
 #include "HynmersMovementComponent.h"
 #include "HynmersGameGameMode.h"
 #include "HynmersBaseTile.h"
+#include "HynmersMovementComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
 
@@ -299,6 +300,15 @@ void AHynmersPlayerController::InitLabTileSerie(int32 NumReps)
 	NumberOfRepetitions = 0;
 
 	ControlledPawn->bCanMoveWithController = false;
+	UHynmersMovementComponent* PawnMovement = Cast<UHynmersMovementComponent>(ControlledPawn->GetCharacterMovement());
+
+	if (PawnMovement) {
+		PawnMovement->bSpecialJumpEnabled = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Hynmers movement component not detected"));
+	}
 }
 
 float AHynmersPlayerController::ConvertKinectAngle(float Rate)
@@ -375,7 +385,6 @@ float AHynmersPlayerController::GetFrameErrorInTime(UAnimSequence* ActiveSequenc
 	TArray<float> AnimValues = GetAnimValues(ActiveSequence, FrameTime, BonesKeys);
 	float Error = GetError(BonesAngles, AnimValues);
 	BasePunctuation = PunctuationTune / Error;
-	UE_LOG(LogTemp, Warning, TEXT("Base points :%f"), BasePunctuation);
 	return Error;
 }
 
