@@ -16,6 +16,7 @@
 #include "HynmersMovementComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
+const float gain = 175.1f / 34774.f;
 
 AHynmersPlayerController::AHynmersPlayerController()
 {
@@ -221,6 +222,10 @@ void AHynmersPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("PosRightThight", this, &AHynmersPlayerController::PosRightThight);
 	InputComponent->BindAxis("PosRightKnee", this, &AHynmersPlayerController::PosRightKnee);
 
+	InputComponent->BindAxis("GonLeftThight", this, &AHynmersPlayerController::GonLeftThight);
+	InputComponent->BindAxis("GonLeftKnee", this, &AHynmersPlayerController::GonLeftKnee);
+	InputComponent->BindAxis("GonRightThight", this, &AHynmersPlayerController::GonRightThight);
+	InputComponent->BindAxis("GonRightKnee", this, &AHynmersPlayerController::GonRightKnee);
 }
 
 void AHynmersPlayerController::PosLeftThight(float rate)
@@ -249,6 +254,26 @@ void AHynmersPlayerController::PosRightThight(float rate)
 void AHynmersPlayerController::PosRightKnee(float rate)
 {
 	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
+}
+
+void AHynmersPlayerController::GonLeftThight(float rate)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Gon Value: %f "), gain*rate - gain*23823 -44.72);
+}
+
+void AHynmersPlayerController::GonLeftKnee(float rate)
+{
+
+}
+
+void AHynmersPlayerController::GonRightThight(float rate)
+{
+
+}
+
+void AHynmersPlayerController::GonRightKnee(float rate)
+{
+
 }
 
 void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int32 NumReps)

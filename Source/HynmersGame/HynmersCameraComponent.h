@@ -21,6 +21,8 @@ private:
 
 	TSharedPtr<class IXRCamera, ESPMode::ThreadSafe> XRCamera;
 
+	FQuat InitialRotation;
+
 public:
 	virtual void BeginPlay() override;
 
@@ -29,6 +31,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraSettings)
 	uint32 bLockToOculus : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraSettings)
+	bool bActiveCameraOffset = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CameraSettings, meta = (EditCondition = "bActiveCameraOffset"))
+	float CameraOffset = 0.f;
 	
 	
 };

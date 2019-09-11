@@ -187,6 +187,12 @@ public:
 	void PosRightThight(float rate);
 	void PosRightKnee(float rate);
 
+	// Gon Input Events
+	void GonLeftThight(float rate);
+	void GonLeftKnee(float rate);
+	void GonRightThight(float rate);
+	void GonRightKnee(float rate);
+
 	void BeginPlayFromGM();
 
 	UFUNCTION(BlueprintCallable, Category = "Mechanics")

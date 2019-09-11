@@ -23,6 +23,10 @@
 		{
 			"Name": "SteamController",
 			"Enabled": true
+		},
+		{
+			"Name": "KinectInput",
+			"Enabled": false
 		}
 	]
 }

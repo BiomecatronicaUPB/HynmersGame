@@ -19,16 +19,18 @@ void UHynmersCameraComponent::BeginPlay() {
 	if (Parents.Num() > 0) {
 		Parent = Parents[0];
 	}
-	
+	XRCamera = GEngine->XRSystem.Get()->GetXRCamera();
 
-	FVector Offset;
-	if (bLockToOculus && GEngine->XRSystem.IsValid() && GetWorld()->WorldType != EWorldType::Editor && GEngine) {
+	if (Parent) {
+		InitialRotation = Parent->RelativeRotation.Quaternion();
+	}
+	else {
+		InitialRotation = RelativeRotation.Quaternion();
+	}
 
-		auto XRSystem = GEngine->XRSystem.Get();
-
-		XRCamera = XRSystem->GetXRCamera();
-
-		XRCamera->UpdatePlayerCamera(StartHMDOrientation, Offset);
+	if (bLockToOculus && GEngine->XRSystem.IsValid() && GetWorld()->WorldType != EWorldType::Editor && GEngine && bActiveCameraOffset) {
+		
+		StartHMDOrientation = FRotator(CameraOffset, 0.f, 0.f).Quaternion();
 		Parent->SetWorldRotation(FRotator(Parent->GetComponentRotation().Pitch, StartHMDOrientation.Rotator().Yaw, StartHMDOrientation.Rotator().Roll));
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *StartHMDOrientation.Rotator().ToString())
 	}
@@ -47,14 +49,14 @@ void UHynmersCameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& D
 		FRotator OculusOrientation;
 		if (XRCamera->UpdatePlayerCamera(Orientation, Position))
 		{
-			FQuat DeltaRotation = StartHMDOrientation.Inverse() * Orientation;
+			FQuat DeltaRotation = StartHMDOrientation.Inverse()* InitialRotation* Orientation;
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *DeltaRotation.Rotator().ToString());
 
 			if (Parent){
-				Parent->SetWorldRotation(DeltaRotation);
+				Parent->SetRelativeRotation(DeltaRotation);
 			}
 			else {
-				SetWorldRotation(DeltaRotation);
+				SetRelativeRotation(DeltaRotation);
 			}
 
 		}

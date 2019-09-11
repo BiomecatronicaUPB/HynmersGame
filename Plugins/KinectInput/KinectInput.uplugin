@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "kinect",
+	"FriendlyName": "Kinect",
 	"Description": "Plugin for impleemnting Kinect sensor as a MoCap controller",
 	"Category": "MovCap",
 	"CreatedBy": "juancaf9312@gmail.com",
