@@ -69,6 +69,7 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	// Influence of the knee in the final error
 	float KneeWeight =0.2f;
 
+
 	///---------------------------------------------------------------------------------------------------------------------------------------------------------
 	// Animation objects
 	class AHynmersCharacter* ControlledPawn = nullptr;

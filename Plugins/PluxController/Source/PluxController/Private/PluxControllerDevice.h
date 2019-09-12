@@ -32,9 +32,9 @@ public:
    bool onRawFrame(int nSeq, const int data[])
    {
 	   PluxControllerStates->GonAxes[0].Scale = (float)data[0];
-	   PluxControllerStates->GonAxes[1].Scale = (float)data[0];
-	   PluxControllerStates->GonAxes[2].Scale = (float)data[0];
-	   PluxControllerStates->GonAxes[3].Scale = (float)data[0];
+	   PluxControllerStates->GonAxes[1].Scale = (float)data[1];
+	   PluxControllerStates->GonAxes[2].Scale = (float)data[2];
+	   PluxControllerStates->GonAxes[3].Scale = (float)data[3];
 
 	   PluxControllerStates->TimeStamp.Scale = FPlatformTime::ToSeconds(FPlatformTime::Cycles());
 	   return !*running.Get();

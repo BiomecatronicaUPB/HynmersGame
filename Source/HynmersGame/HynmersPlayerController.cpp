@@ -16,7 +16,6 @@
 #include "HynmersMovementComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHynmersPlayer, Warning, All);
-const float gain = 175.1f / 34774.f;
 
 AHynmersPlayerController::AHynmersPlayerController()
 {
@@ -45,7 +44,7 @@ void AHynmersPlayerController::BeginPlayFromGM()
 	Sequences.Add(BikeSequence);				//	4
 	Sequences.Add(LegsMoveSequence);			//	5
 
-	Montages.Init(nullptr,Sequences.Num());
+	Montages.Init(nullptr, Sequences.Num());
 
 	BonesAngles.Add("thigh_L", 0.f);
 	BonesAngles.Add("shin_L", 0.f);
@@ -71,7 +70,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	Super::TickActor(DeltaSeconds, TickType, ThisTickFunction);
 
 	if (!CheckAllNeededAssets())return;
-	
+
 	ActiveTile = ControlledPawn->GetActiveTile();
 
 	UAnimSequence* ActiveSequence = Sequences[(int32)ActiveTile];
@@ -86,9 +85,9 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	int32 ActiveFrameRange = AnimationSpecificFrameRange.Contains(ActiveTile) ? AnimationSpecificFrameRange[ActiveTile] : FrameRange;
 
 	ActiveFrameRange = FMath::Clamp(ActiveFrameRange, 0, ActiveSequence->GetNumberOfFrames());
-	
+
 	TArray<int32> Frames = GetFrameRange(ActiveMontage, ActiveFrameRange);
-	
+
 	TArray<FName> BonesKeys;
 	BonesAngles.GenerateKeyArray(BonesKeys);
 
@@ -116,13 +115,13 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 
 		BestTime = BinarySearch(ActiveSequence, BestTimes, BonesKeys);
 	}
-	
-	float CurrentTime =  PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
+
+	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
 
 	TriggerNotifies(ActiveSequence, CurrentTime, BestTime);
-	
+
 	SetMontagePosition(ActiveMontage, BestTime);
-	   
+
 	int32 CurrentFrame = ActiveSequence->GetFrameAtTime(CurrentTime);
 	int32 NewFrame = ActiveSequence->GetFrameAtTime(BestTime);
 
@@ -134,8 +133,8 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	if (DeltaFrame < 0)
 	{
 		DeltaFrame = DeltaFrameConverted;
-		
-		if(DeltaFrame <= EvalFrameRate)
+
+		if (DeltaFrame <= EvalFrameRate)
 			NumberOfRepetitions++;
 	}
 
@@ -143,7 +142,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 	if (DeltaFrame > 0 && DeltaFrame <= EvalFrameRate)
 	{
 		Puntuaction += BasePunctuation;
-		
+
 		TArray<FName> BonesAnglesKeys;
 		BonesAngles.GenerateKeyArray(BonesAnglesKeys);
 
@@ -161,7 +160,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 		CurrentTime = GetWorld()->GetTimeSeconds();
 
 		float DeltaTime = CurrentTime - PreviousTime;
-		
+
 		if (DeltaTime > TimeInterval && !bApplyTimePenalty) {
 			bApplyTimePenalty = true;
 			TimeBonus = PunctuationTune / (TimeInterval - DeltaTime);
@@ -222,10 +221,11 @@ void AHynmersPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("PosRightThight", this, &AHynmersPlayerController::PosRightThight);
 	InputComponent->BindAxis("PosRightKnee", this, &AHynmersPlayerController::PosRightKnee);
 
-	InputComponent->BindAxis("GonLeftThight", this, &AHynmersPlayerController::GonLeftThight);
-	InputComponent->BindAxis("GonLeftKnee", this, &AHynmersPlayerController::GonLeftKnee);
-	InputComponent->BindAxis("GonRightThight", this, &AHynmersPlayerController::GonRightThight);
-	InputComponent->BindAxis("GonRightKnee", this, &AHynmersPlayerController::GonRightKnee);
+	//InputComponent->BindAxis("GonLeftThight", this, &AHynmersPlayerController::GonLeftThight);
+	//InputComponent->BindAxis("GonLeftKnee", this, &AHynmersPlayerController::GonLeftKnee);
+	//InputComponent->BindAxis("GonRightThight", this, &AHynmersPlayerController::GonRightThight);
+	//InputComponent->BindAxis("GonRightKnee", this, &AHynmersPlayerController::GonRightKnee);
+
 }
 
 void AHynmersPlayerController::PosLeftThight(float rate)
@@ -256,24 +256,29 @@ void AHynmersPlayerController::PosRightKnee(float rate)
 	BonesAngles.Add("shin_R", ConvertKinectAngle(rate));
 }
 
+
 void AHynmersPlayerController::GonLeftThight(float rate)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Gon Value: %f "), gain*rate - gain*23823 -44.72);
+	const float gain = 180.f / 56368.f;
+	float Angle = gain * rate - gain * 7076.f - 90.f;
+	BonesAngles.Add("thigh_L", Angle);
 }
 
 void AHynmersPlayerController::GonLeftKnee(float rate)
 {
-
+	const float gain = 180.f / 48558.f;
+	float Angle = gain * rate - gain * 12315 - 90.f;
+	BonesAngles.Add("shin_L", Angle);
 }
 
 void AHynmersPlayerController::GonRightThight(float rate)
 {
-
+	BonesAngles.Add("thigh_R", rate);
 }
 
 void AHynmersPlayerController::GonRightKnee(float rate)
 {
-
+	BonesAngles.Add("shin_R", rate);
 }
 
 void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int32 NumReps)
@@ -288,9 +293,9 @@ void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int3
 
 	DistanceToPickUpActor = DistanceToActor;
 
-	DistanceStep = DistanceToPickUpActor / ((float)NumReps+1);
+	DistanceStep = DistanceToPickUpActor / ((float)NumReps + 1);
 	TagetRepetitions = NumReps;
-	
+
 	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
 
 	DistanceToMove = DistanceStepFrames;
@@ -315,7 +320,7 @@ void AHynmersPlayerController::InitNavigationTileSerie(int32 NumReps)
 	PreviousTime = GetWorld()->GetTimeSeconds();
 
 	ControlledPawn->bCanMoveWithController = false;
-	
+
 	bIsInPC = true;
 }
 
@@ -350,7 +355,7 @@ float AHynmersPlayerController::GetError(TMap<FName, float> &BonesValues, TArray
 	BonesValues.GenerateKeyArray(Keys);
 
 	for (int BoneIndex = 0; BoneIndex < Keys.Num(); BoneIndex++) {
-		Error += FMath::Abs( ((Keys[BoneIndex].ToString().Contains("thigh"))? ThighWeight:KneeWeight)*(BonesValues[Keys[BoneIndex]] - AnimValues[BoneIndex]) );
+		Error += FMath::Abs(((Keys[BoneIndex].ToString().Contains("thigh")) ? ThighWeight : KneeWeight)*(BonesValues[Keys[BoneIndex]] - AnimValues[BoneIndex]));
 	}
 	return Error;
 }
@@ -360,11 +365,11 @@ TArray<float> AHynmersPlayerController::GetAnimValues(UAnimSequence* AnimSequenc
 	if (!AnimSequence)
 	{
 		UE_LOG(LogHynmersPlayer, Error, TEXT("Passed an null animations sequence"))
-		return TArray<float>();
+			return TArray<float>();
 	}
 	// Yaw angle is the one in the sagittal plane
 	TArray<float> AnimValues;
-	for (int BoneIndex = 0;  BoneIndex < BoneNames.Num(); BoneIndex++) {
+	for (int BoneIndex = 0; BoneIndex < BoneNames.Num(); BoneIndex++) {
 		FTransform FrameTransform;
 		AnimSequence->GetBoneTransform(FrameTransform, ControlledPawn->GetMesh()->GetBoneIndex(BoneNames[BoneIndex]), Time, true);
 		AnimValues.Add(FrameTransform.GetRotation().Rotator().Yaw - BonesOffsets[BoneNames[BoneIndex]]);
@@ -378,11 +383,11 @@ void AHynmersPlayerController::SetMontagePosition(UAnimMontage * Montage, float 
 
 	if (PawnAnimationInstance->GetCurrentActiveMontage() != Montage)
 	{
-		PawnAnimationInstance->Montage_Stop(0,PawnAnimationInstance->GetCurrentActiveMontage());
+		PawnAnimationInstance->Montage_Stop(0, PawnAnimationInstance->GetCurrentActiveMontage());
 	}
 
 	if (Time < 0 || Time > Montage->GetTimeAtFrame(Montage->GetNumberOfFrames() - 1)) {
-		UE_LOG(LogHynmersPlayer, Warning, TEXT("Out of frame bounds of active montage. Clamped to a valid frame") )
+		UE_LOG(LogHynmersPlayer, Warning, TEXT("Out of frame bounds of active montage. Clamped to a valid frame"))
 	}
 
 	PawnAnimationInstance->Montage_Play(Montage);
@@ -401,7 +406,7 @@ TArray<int32> AHynmersPlayerController::GetFrameRange(UAnimMontage * ActiveMonta
 	float CurrentTime = PawnAnimationInstance->Montage_GetPosition(ActiveMontage);
 	int32 CurrentFrame = ActiveMontage->GetFrameAtTime(CurrentTime);
 
-	TArray<int32> Frames = { CurrentFrame + OffsetFrames, CurrentFrame + FrameRange -1 + OffsetFrames };
+	TArray<int32> Frames = { CurrentFrame + OffsetFrames, CurrentFrame + FrameRange - 1 + OffsetFrames };
 	return Frames;
 }
 
@@ -454,7 +459,7 @@ float AHynmersPlayerController::BinarySearch(UAnimSequence* ActiveSequence, cons
 
 	if (Depth < BinarySearchDepth)
 	{
-		return BinarySearch(ActiveSequence, { NewTimes[BetterIndex],NewTimes[BetterIndex +1] }, BonesKeys, ++Depth);
+		return BinarySearch(ActiveSequence, { NewTimes[BetterIndex],NewTimes[BetterIndex + 1] }, BonesKeys, ++Depth);
 	}
 
 	int32 BestTimeIndex;

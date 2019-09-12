@@ -25,7 +25,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "KinectInput",
+			"Name": "PluxController",
 			"Enabled": false
 		}
 	]

@@ -19,7 +19,7 @@ void UHynmersCameraComponent::BeginPlay() {
 	if (Parents.Num() > 0) {
 		Parent = Parents[0];
 	}
-	XRCamera = GEngine->XRSystem.Get()->GetXRCamera();
+	
 
 	if (Parent) {
 		InitialRotation = Parent->RelativeRotation.Quaternion();
@@ -28,11 +28,15 @@ void UHynmersCameraComponent::BeginPlay() {
 		InitialRotation = RelativeRotation.Quaternion();
 	}
 
-	if (bLockToOculus && GEngine->XRSystem.IsValid() && GetWorld()->WorldType != EWorldType::Editor && GEngine && bActiveCameraOffset) {
+	if (bLockToOculus && GEngine->XRSystem.IsValid() && GetWorld()->WorldType != EWorldType::Editor && GEngine ) {
 		
-		StartHMDOrientation = FRotator(CameraOffset, 0.f, 0.f).Quaternion();
-		Parent->SetWorldRotation(FRotator(Parent->GetComponentRotation().Pitch, StartHMDOrientation.Rotator().Yaw, StartHMDOrientation.Rotator().Roll));
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *StartHMDOrientation.Rotator().ToString())
+		XRCamera = GEngine->XRSystem.Get()->GetXRCamera();
+
+		if (bActiveCameraOffset) {
+			StartHMDOrientation = FRotator(CameraOffset, 0.f, 0.f).Quaternion();
+			Parent->SetWorldRotation(FRotator(Parent->GetComponentRotation().Pitch, StartHMDOrientation.Rotator().Yaw, StartHMDOrientation.Rotator().Roll));
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *StartHMDOrientation.Rotator().ToString())
+		}
 	}
 
 }
