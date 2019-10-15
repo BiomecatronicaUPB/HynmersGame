@@ -94,7 +94,7 @@ class HYNMERSGAME_API UHMainMenu : public UHMenuWidget
 	UFUNCTION()
 	void OnLegs();
 
-	void ExecOnExerciseWidgetOpen(UTexture2D* ImageToSet, FString ExerciseDescription, int32 ExerciseIndex);
+	void ExecOnExerciseWidgetOpen(UButton* ClickedButton, UTexture2D* ImageToSet, FString ExerciseDescription, int32 ExerciseIndex);
 
 	bool CheckImageDesc(const int32 &ExerciseIndex, FString &ExerciseName);
 

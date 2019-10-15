@@ -74,6 +74,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* txt_Description;
 
+	class UButton* btn_Pressed;
+
 	int32 ExerciseIndex;
 
 	virtual void Teardown() override;

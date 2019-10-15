@@ -115,6 +115,8 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	int32 TagetRepetitions;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
+	int32 ShowTagetRepetitions = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	int32 NumberOfRepetitions = 0;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	float PunctuationTune = 400.f;

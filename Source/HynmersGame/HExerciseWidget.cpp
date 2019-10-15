@@ -3,6 +3,7 @@
 #include "HExerciseWidget.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
+#include "Components/TextBlock.h"
 
 #include "HGameInstance.h"
 
@@ -45,6 +46,14 @@ void UHExerciseWidget::OnAdd()
 
 	GameInstance->AddExercise(NewExercise);
 
+	if (btn_Pressed->GetChildrenCount() == 1) {
+		UTextBlock* txt_Pressed = Cast<UTextBlock>(btn_Pressed->GetChildAt(0));
+		if (txt_Pressed) {
+			txt_Pressed->SetColorAndOpacity(FLinearColor(0.140625f, 0.121732f, 0.029403f));
+		}
+		txt_Pressed = nullptr;
+	}
+
 	Teardown();
 }
 
@@ -55,6 +64,14 @@ void UHExerciseWidget::OnRemove()
 	FSessionInfo RemoveExercise;
 	RemoveExercise.ExerciseIndex = ExerciseIndex;
 	GameInstance->RemoveExercise(RemoveExercise);
+
+	if (btn_Pressed->GetChildrenCount() == 1) {
+		UTextBlock* txt_Pressed = Cast<UTextBlock>(btn_Pressed->GetChildAt(0));
+		if (txt_Pressed) {
+			txt_Pressed->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f));
+		}
+		txt_Pressed = nullptr;
+	}
 }
 
 void UHExerciseWidget::onReturn()

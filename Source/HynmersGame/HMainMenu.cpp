@@ -96,7 +96,7 @@ void UHMainMenu::OnGate()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Bridge);
+	ExecOnExerciseWidgetOpen(btn_Gate, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Bridge);
 }
 
 
@@ -107,7 +107,7 @@ void UHMainMenu::OnJump()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Lab);
+	ExecOnExerciseWidgetOpen(btn_Jump, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Lab);
 }
 
 void UHMainMenu::OnSwim()
@@ -117,7 +117,7 @@ void UHMainMenu::OnSwim()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Machine);
+	ExecOnExerciseWidgetOpen(btn_Swim, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Machine);
 }
 
 void UHMainMenu::OnBike()
@@ -127,7 +127,7 @@ void UHMainMenu::OnBike()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Com);
+	ExecOnExerciseWidgetOpen(btn_Bike, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Com);
 }
 
 void UHMainMenu::OnBoard()
@@ -137,7 +137,7 @@ void UHMainMenu::OnBoard()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Rooms);
+	ExecOnExerciseWidgetOpen(btn_Board, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Rooms);
 }
 
 void UHMainMenu::OnLegs()
@@ -147,10 +147,10 @@ void UHMainMenu::OnLegs()
 
 	if (!CheckImageDesc(ExerciseIndex, ExerciseName)) return;
 
-	ExecOnExerciseWidgetOpen(ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Nav);
+	ExecOnExerciseWidgetOpen(btn_Legs, ExercisesList[ExerciseIndex], ExercisesDescription[ExerciseIndex], (int32)EActiveTile::Nav);
 }
 
-void UHMainMenu::ExecOnExerciseWidgetOpen(UTexture2D * ImageToSet, FString ExerciseDescription, int32 ExerciseIndex)
+void UHMainMenu::ExecOnExerciseWidgetOpen(UButton* ClickedButton, UTexture2D* ImageToSet, FString ExerciseDescription, int32 ExerciseIndex)
 {
 	if (!ExerciseWidgetClass)return;
 
@@ -161,6 +161,7 @@ void UHMainMenu::ExecOnExerciseWidgetOpen(UTexture2D * ImageToSet, FString Exerc
 	ExerciseWidget->txt_Description->SetText(FText::FromString(ExerciseDescription));
 	ExerciseWidget->ExerciseIndex = ExerciseIndex;
 	ExerciseWidget->SetGameInstance(GameInstance);
+	ExerciseWidget->btn_Pressed = ClickedButton;
 
 	ExerciseWidget->Setup();
 }

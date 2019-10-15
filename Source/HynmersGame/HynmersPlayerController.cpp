@@ -179,6 +179,8 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 
 	}
 
+	Puntuaction = FMath::RoundToInt(FMath::Clamp(Puntuaction / 1000.f, 0.f, 1000000.f));
+
 	/// Movement algorithm only for bridge, com, machine and rooms
 
 	if (ActiveTile == EActiveTile::Bridge || ActiveTile == EActiveTile::Machine || ActiveTile == EActiveTile::Com || ActiveTile == EActiveTile::Rooms) {
@@ -295,6 +297,7 @@ void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int3
 
 	DistanceStep = DistanceToPickUpActor / ((float)NumReps + 1);
 	TagetRepetitions = NumReps;
+	ShowTagetRepetitions = NumReps;
 
 	DistanceStepFrames = DistanceStep / (float)Sequences[(int32)ActiveTile]->GetNumberOfFrames();
 
@@ -314,6 +317,7 @@ void AHynmersPlayerController::SetCurrentPickUpActor(float DistanceToActor, int3
 void AHynmersPlayerController::InitNavigationTileSerie(int32 NumReps)
 {
 	TagetRepetitions = NumReps;
+	ShowTagetRepetitions = NumReps;
 	NumberOfRepetitions = 0;
 	PreviousRepetitions = 0;
 
@@ -327,6 +331,7 @@ void AHynmersPlayerController::InitNavigationTileSerie(int32 NumReps)
 void AHynmersPlayerController::InitLabTileSerie(int32 NumReps)
 {
 	TagetRepetitions = NumReps;
+	ShowTagetRepetitions = NumReps;
 	NumberOfRepetitions = 0;
 
 	ControlledPawn->bCanMoveWithController = false;
