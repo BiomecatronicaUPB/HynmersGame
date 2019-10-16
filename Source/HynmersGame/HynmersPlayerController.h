@@ -119,7 +119,7 @@ class HYNMERSGAME_API AHynmersPlayerController : public APlayerController
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
 	int32 NumberOfRepetitions = 0;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mechanics", meta = (AllowPrivateAccess = "true"))
-	float PunctuationTune = 400.f;
+	float PunctuationTune = 0.04f;
 	float BasePunctuation = 0.f;
 	///-----------------------------------------------------------------------------------------------------------------------------------------------------------
 

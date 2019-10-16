@@ -141,7 +141,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 
 	if (DeltaFrame > 0 && DeltaFrame <= EvalFrameRate)
 	{
-		Puntuaction += BasePunctuation;
+		Puntuaction += BasePunctuation * PunctuationTune;
 
 		TArray<FName> BonesAnglesKeys;
 		BonesAngles.GenerateKeyArray(BonesAnglesKeys);
@@ -151,7 +151,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 				float Bonus = (BonesAngles[BonesAnglesKeys[Index]] > 0) ?
 					ControlledPawn->CurrentTile->UpperLimits[Index] - BonesAngles[BonesAnglesKeys[Index]] :
 					BonesAngles[BonesAnglesKeys[Index]] - ControlledPawn->CurrentTile->LowerLimits[Index];
-				Puntuaction += (Bonus * 5);
+				Puntuaction += (Bonus * 5) * PunctuationTune;
 			}
 		}
 	}
@@ -179,7 +179,7 @@ void AHynmersPlayerController::TickActor(float DeltaSeconds, ELevelTick TickType
 
 	}
 
-	Puntuaction = FMath::RoundToInt(FMath::Clamp(Puntuaction / 1000.f, 0.f, 1000000.f));
+	Puntuaction = FMath::RoundToInt(FMath::Clamp(Puntuaction, 0.f, 1000000.f));
 
 	/// Movement algorithm only for bridge, com, machine and rooms
 
